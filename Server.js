@@ -2,8 +2,18 @@ var express = require('express');
 var app = express();
 var pg = require('pg');
 var multer = require('multer');
+var Jimp = require("jimp");
 var storage = multer.memoryStorage();
 var upload = multer({ storage: storage });
+
+function createThumbnail(image, mime, maxWidth, maxHeight) {
+	return new Promise(function(resolve, reject) {
+		Jimp.read(image).then(img => {
+			img.scaleToFit(maxWidth, maxHeight, Jimp.RESIZE_BILINEAR);
+			img.getBuffer(mime, (err, data) => err ? reject(err) : resolve(data));
+		});
+	});
+}
 
 var config = {
   max: 10, // max number of clients in the pool
@@ -42,20 +52,25 @@ app.get('/api/image/:id/details', function(req, res) {
   pool.connect(function(err, client, done) {
     if(err) {
       res.status(500).json({success: false, error: err});
+      return;
     }
     client.query('SELECT id,name FROM public.images WHERE id = $1', [req.params.id], function(err, result) {
       if(err) {
         res.status(500).json({success: false, error: err});
+        return;
       }
       if(result.rows.length > 0) {
         res.json(result.rows[0]);
       } else {
         res.status(500).json({success: false, error: "Image not found!"});
+        return;
       }
     });
   });
 });
+app.get('/api/image/:id/thumbnail', function(re, res) {
 
+});
 app.post('/api/login', function(req, res) {
 	res.json({success: true});
 });
@@ -64,26 +79,27 @@ app.post('/api/upload', upload.single('image'), function(req, res) {
 	console.log(req.file.buffer);
 	console.log(req.body.name);
 	pool.connect(function(err, client, done) {
-		if(err) {
-			res.status(500).json({success: false, error: err});
-			return;
-		}
-		client.query('INSERT INTO images (name, image) VALUES ($1, $2) RETURNING id', [req.body.name, req.file.buffer], function(err, result) {
-			done();
-			if(err) {
-				res.status(500).json({success: false, error: err});
-				return;
-			}
-
-			if(result.rowCount > 0) {
-				res.json({success: true, id: result.rows[0].id});
-				return;
-			} else {
-				res.status(500).json({success: false, error: err});
-				return;
-			}
-		});
-	});
+    if(err) {
+      res.status(500).json({success: false, error: err});
+      return;
+    }
+    createThumbnail(req.file.buffer, req.file.mimetype, 200, 200).then(thumbnail) => {
+      client.query('INSERT INTO public.images (name, image, thumbnail, mimetype) VALUES ($1, $2, $3, $4) RETURNING id', [req.body.name, req.file.buffer, thumbnail, req.file.mimetype], function(err, result) {
+        done();
+        if(err) {
+          res.status(500).json({success: false, error: err});
+          return;
+        }
+        if(result.rowCount > 0) {
+          res.json({success: true, id: result.rows[0].id});
+				  return;
+        } else {
+          res.status(500).json({success: false, error: err});
+          return;
+        }
+      });
+    }
+  });
 });
 
 //placeholder form
