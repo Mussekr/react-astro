@@ -55,8 +55,7 @@ app.post('/api/upload', upload.single('image'), function(req, res) {
 			res.status(500).json({success: false, error: err});
 			return;
 		}
-		var file = '\\x' + req.file.buffer.toString('hex');
-		client.query('INSERT INTO images (name, image) VALUES ($1, $2) RETURNING id', [req.body.name, file], function(err, result) {
+		client.query('INSERT INTO images (name, image) VALUES ($1, $2) RETURNING id', [req.body.name, req.file.buffer], function(err, result) {
 			done();
 			if(err) {
 				res.status(500).json({success: false, error: err});
