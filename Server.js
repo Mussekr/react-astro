@@ -54,15 +54,12 @@ app.post('/api/upload', upload.single('image'), function(req, res) {
 		if(err) {
 			res.json({success: false});
 		}
-		client.query('INSERT INTO images (name, image) VALUES ($1, $2)', [req.body.name], [req.file.buffer], function(err, result) {
+		client.query('INSERT INTO images (name, image) VALUES ($1, $2)', [req.body.name, req.file.buffer], function(err, result) {
 			done();
 			if(err) {
-				res.json({success: false});
-			}
-			if(result.rows.length > 0) {
-				res.json({success: true});
+				res.json({success: false, error: err});
 			} else {
-				res.json({success: false});
+				res.json({success: true});
 			}
 		});
 	});
