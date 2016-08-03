@@ -52,14 +52,22 @@ app.post('/api/upload', upload.single('image'), function(req, res) {
 	console.log(req.body.name);
 	pool.connect(function(err, client, done) {
 		if(err) {
-			res.json({success: false});
+			res.status(500).json({success: false, error: err});
+			return;
 		}
 		client.query('INSERT INTO images (name, image) VALUES ($1, $2)', [req.body.name, req.file.buffer], function(err, result) {
 			done();
 			if(err) {
-				res.json({success: false, error: err});
-			} else {
+				res.status(500).json({success: false, error: err});
+				return;
+			}
+
+			if(result.rows.length > 0) {
 				res.json({success: true});
+				return;
+			} else {
+				res.status(500).json({success: false, error: err});
+				return;
 			}
 		});
 	});
