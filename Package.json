@@ -10,7 +10,7 @@
   "scripts": {
     "start": "npm run dev-server",
     "watch": "webpack -w",
-    "dev-server": "node Server.js",
+    "dev-server": "nodemon Server.js",
     "prod": "NODE_ENV=production node server.js",
     "postinstall": "webpack -p"
   },
@@ -32,5 +32,8 @@
   },
   "keywords": [
     "react"
-  ]
+  ],
+  "devDependencies": {
+    "nodemon": "^1.10.0"
+  }
 }
