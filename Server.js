@@ -17,14 +17,12 @@ app.get('/api/image/:id', function(req, res) {
 
 	pool.connect(function(err, client, done) {
 		if(err) {
-			res.json({success: false, error: err});
+			res.status(500).json({success: false, error: err});
 		}
 		client.query('SELECT image FROM public.images WHERE id = $1', [req.params.id], function (err, result) {
-
 			done();
-
 			if(err) {
-				res.json({success: false, error: err});
+				res.status(500).json({success: false, error: err});
 			}
 
 			if(result.rows.length > 0) {
@@ -39,8 +37,23 @@ app.get('/api/image/:id', function(req, res) {
 			}
 		});
 	});
-
-
+});
+app.get('/api/image/:id/details', function(req, res) {
+  pool.connect(function(err, client, done) {
+    if(err) {
+      res.status(500).json({success: false, error: err});
+    }
+    client.query('SELECT id,name FROM public.images WHERE id = $1', [req.params.id], function(err, result) {
+      if(err) {
+        res.status(500).json({success: false, error: err});
+      }
+      if(result.rows.length > 0) {
+        res.json(result.rows[0]);
+      } else {
+        res.status(500).json({success: false, error: "Image not found!"});
+      }
+    });
+  });
 });
 
 app.post('/api/login', function(req, res) {
