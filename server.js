@@ -19,7 +19,7 @@ function createThumbnail(image, mime, maxWidth, maxHeight) {
 var config = {
   max: 20, // max number of clients in the pool
   idleTimeoutMillis: 30000, // how long a client is allowed to remain idle before being closed
-	host: process.env.DATABASE_URL || 'localhost'
+	host: process.env.PGHOST || 'localhost'
 };
 var pool =  new pg.Pool(config);
 
