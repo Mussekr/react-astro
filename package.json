@@ -12,7 +12,9 @@
     "watch": "webpack -w",
     "dev-server": "nodemon server.js",
     "prod": "NODE_ENV=production node server.js",
-    "postinstall": "webpack -p"
+    "postinstall": "webpack -p && npm run prod-migrate",
+    "prod-migrate": "npm run migrate -- up -e prod",
+    "migrate": "db-migrate"
   },
   "author": "",
   "license": "ISC",
@@ -21,6 +23,7 @@
     "babel-loader": "^6.2.0",
     "babel-preset-es2015": "^6.1.18",
     "babel-preset-react": "^6.1.18",
+    "db-migrate": "^0.9.25",
     "express": "^4.13.3",
     "jimp": "^0.2.24",
     "multer": "^1.1.0",
