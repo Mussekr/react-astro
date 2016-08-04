@@ -5,6 +5,7 @@ var multer = require('multer');
 var Jimp = require("jimp");
 var storage = multer.memoryStorage();
 var upload = multer({ storage: storage });
+var process = require('process');
 
 function createThumbnail(image, mime, maxWidth, maxHeight) {
 	return new Promise(function(resolve, reject) {
@@ -18,6 +19,7 @@ function createThumbnail(image, mime, maxWidth, maxHeight) {
 var config = {
 	max: 20, // max number of clients in the pool
 	idleTimeoutMillis: 30000, // how long a client is allowed to remain idle before being closed
+	host: process.env.PGHOST || 'localhost'
 };
 var pool =	new pg.Pool(config);
 
