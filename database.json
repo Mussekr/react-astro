@@ -7,12 +7,5 @@
     "database": {"ENV": "PGDATABASE"}
   },
 
-  "prod": {
-    "driver": "pg",
-    "host": {"ENV": "DATABASE_URL"},
-    "user": {"ENV": "PGUSER"},
-    "password": {"ENV": "PGPASSWORD"},
-    "database": {"ENV": "PGDATABASE"},
-    "native": true
-  }
+  "prod": {"ENV": "DATABASE_URL"}
 }
