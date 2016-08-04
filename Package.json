@@ -10,7 +10,7 @@
   "scripts": {
     "start": "npm run dev-server",
     "watch": "webpack -w",
-    "dev-server": "nodemon Server.js",
+    "dev-server": "nodemon server.js",
     "prod": "NODE_ENV=production node server.js",
     "postinstall": "webpack -p"
   },
