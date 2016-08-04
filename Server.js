@@ -28,22 +28,25 @@ app.get('/api/image/:id', function(req, res) {
 	pool.connect(function(err, client, done) {
 		if(err) {
 			res.status(500).json({success: false, error: err});
+      return;
 		}
-		client.query('SELECT image FROM public.images WHERE id = $1', [req.params.id], function (err, result) {
+		client.query('SELECT image, mimetype FROM public.images WHERE id = $1', [req.params.id], function (err, result) {
 			done();
 			if(err) {
 				res.status(500).json({success: false, error: err});
+        return;
 			}
 
 			if(result.rows.length > 0) {
 				var img = new Buffer(result.rows[0].image, 'binary');
 				res.writeHead(200, {
-					'Content-Type': 'image/jpeg',
+					'Content-Type': result.rows[0].mimetype,
 					'Content-Length': img.length
 				});
 				res.end(img);
 			} else {
 				res.json({success: false, error: "image not found!"});
+        return;
 			}
 		});
 	});
@@ -68,8 +71,29 @@ app.get('/api/image/:id/details', function(req, res) {
     });
   });
 });
-app.get('/api/image/:id/thumbnail', function(re, res) {
-
+app.get('/api/image/:id/thumbnail', function(req, res) {
+  pool.connect(function(err, client, done) {
+    if(err) {
+      res.status(500).json({success: false, error: err});
+      return;
+    }
+    client.query('SELECT thumbnail, mimetype FROM public.images WHERE id = $1', [req.params.id], function(err, result) {
+      if(err) {
+        res.status(500).json({success: false, error: err});
+        return;
+      }
+      if(result.rows.length > 0) {
+				var img = new Buffer(result.rows[0].thumbnail, 'binary');
+				res.writeHead(200, {
+					'Content-Type': result.rows[0].mimetype,
+					'Content-Length': img.length
+				});
+				res.end(img);
+			} else {
+				res.json({success: false, error: "image not found!"});
+			}
+    });
+  });
 });
 app.post('/api/login', function(req, res) {
 	res.json({success: true});
@@ -83,7 +107,7 @@ app.post('/api/upload', upload.single('image'), function(req, res) {
       res.status(500).json({success: false, error: err});
       return;
     }
-    createThumbnail(req.file.buffer, req.file.mimetype, 200, 200).then(thumbnail) => {
+    createThumbnail(req.file.buffer, req.file.mimetype, 200, 200).then(thumbnail => {
       client.query('INSERT INTO public.images (name, image, thumbnail, mimetype) VALUES ($1, $2, $3, $4) RETURNING id', [req.body.name, req.file.buffer, thumbnail, req.file.mimetype], function(err, result) {
         done();
         if(err) {
@@ -98,7 +122,7 @@ app.post('/api/upload', upload.single('image'), function(req, res) {
           return;
         }
       });
-    }
+    });
   });
 });
 
