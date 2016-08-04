@@ -16,10 +16,10 @@ function createThumbnail(image, mime, maxWidth, maxHeight) {
 }
 
 var config = {
-  max: 20, // max number of clients in the pool
-  idleTimeoutMillis: 30000, // how long a client is allowed to remain idle before being closed
+	max: 20, // max number of clients in the pool
+	idleTimeoutMillis: 30000, // how long a client is allowed to remain idle before being closed
 };
-var pool =  new pg.Pool(config);
+var pool =	new pg.Pool(config);
 
 app.use(express.static(__dirname + '/'));
 
@@ -28,13 +28,13 @@ app.get('/api/image/:id', function(req, res) {
 	pool.connect(function(err, client, done) {
 		if(err) {
 			res.status(500).json({success: false, error: err});
-      return;
+			return;
 		}
 		client.query('SELECT image, mimetype FROM public.images WHERE id = $1', [req.params.id], function (err, result) {
 			done();
 			if(err) {
 				res.status(500).json({success: false, error: err});
-        return;
+				return;
 			}
 
 			if(result.rows.length > 0) {
@@ -46,43 +46,43 @@ app.get('/api/image/:id', function(req, res) {
 				res.end(img);
 			} else {
 				res.json({success: false, error: "image not found!"});
-        return;
+				return;
 			}
 		});
 	});
 });
 app.get('/api/image/:id/details', function(req, res) {
-  pool.connect(function(err, client, done) {
-    if(err) {
-      res.status(500).json({success: false, error: err});
-      return;
-    }
-    client.query('SELECT id,name FROM public.images WHERE id = $1', [req.params.id], function(err, result) {
-      if(err) {
-        res.status(500).json({success: false, error: err});
-        return;
-      }
-      if(result.rows.length > 0) {
-        res.json(result.rows[0]);
-      } else {
-        res.status(500).json({success: false, error: "Image not found!"});
-        return;
-      }
-    });
-  });
+	pool.connect(function(err, client, done) {
+		if(err) {
+			res.status(500).json({success: false, error: err});
+			return;
+		}
+		client.query('SELECT id,name FROM public.images WHERE id = $1', [req.params.id], function(err, result) {
+			if(err) {
+				res.status(500).json({success: false, error: err});
+				return;
+			}
+			if(result.rows.length > 0) {
+				res.json(result.rows[0]);
+			} else {
+				res.status(500).json({success: false, error: "Image not found!"});
+				return;
+			}
+		});
+	});
 });
 app.get('/api/image/:id/thumbnail', function(req, res) {
-  pool.connect(function(err, client, done) {
-    if(err) {
-      res.status(500).json({success: false, error: err});
-      return;
-    }
-    client.query('SELECT thumbnail, mimetype FROM public.images WHERE id = $1', [req.params.id], function(err, result) {
-      if(err) {
-        res.status(500).json({success: false, error: err});
-        return;
-      }
-      if(result.rows.length > 0) {
+	pool.connect(function(err, client, done) {
+		if(err) {
+			res.status(500).json({success: false, error: err});
+			return;
+		}
+		client.query('SELECT thumbnail, mimetype FROM public.images WHERE id = $1', [req.params.id], function(err, result) {
+			if(err) {
+				res.status(500).json({success: false, error: err});
+				return;
+			}
+			if(result.rows.length > 0) {
 				var img = new Buffer(result.rows[0].thumbnail, 'binary');
 				res.writeHead(200, {
 					'Content-Type': result.rows[0].mimetype,
@@ -92,8 +92,8 @@ app.get('/api/image/:id/thumbnail', function(req, res) {
 			} else {
 				res.json({success: false, error: "image not found!"});
 			}
-    });
-  });
+		});
+	});
 });
 app.post('/api/login', function(req, res) {
 	res.json({success: true});
@@ -103,27 +103,27 @@ app.post('/api/upload', upload.single('image'), function(req, res) {
 	console.log(req.file.buffer);
 	console.log(req.body.name);
 	pool.connect(function(err, client, done) {
-    if(err) {
-      res.status(500).json({success: false, error: err});
-      return;
-    }
-    createThumbnail(req.file.buffer, req.file.mimetype, 200, 200).then(thumbnail => {
-      client.query('INSERT INTO public.images (name, image, thumbnail, mimetype) VALUES ($1, $2, $3, $4) RETURNING id', [req.body.name, req.file.buffer, thumbnail, req.file.mimetype], function(err, result) {
-        done();
-        if(err) {
-          res.status(500).json({success: false, error: err});
-          return;
-        }
-        if(result.rowCount > 0) {
-          res.json({success: true, id: result.rows[0].id});
-				  return;
-        } else {
-          res.status(500).json({success: false, error: err});
-          return;
-        }
-      });
-    });
-  });
+		if(err) {
+			res.status(500).json({success: false, error: err});
+			return;
+		}
+		createThumbnail(req.file.buffer, req.file.mimetype, 200, 200).then(thumbnail => {
+			client.query('INSERT INTO public.images (name, image, thumbnail, mimetype) VALUES ($1, $2, $3, $4) RETURNING id', [req.body.name, req.file.buffer, thumbnail, req.file.mimetype], function(err, result) {
+				done();
+				if(err) {
+					res.status(500).json({success: false, error: err});
+					return;
+				}
+				if(result.rowCount > 0) {
+					res.json({success: true, id: result.rows[0].id});
+					return;
+				} else {
+					res.status(500).json({success: false, error: err});
+					return;
+				}
+			});
+		});
+	});
 });
 
 //placeholder form
@@ -136,5 +136,5 @@ app.listen(process.env.PORT || 8080);
 
 pool.on('error', function (err, client) {
 
-  console.error('idle client error', err.message, err.stack)
+	console.error('idle client error', err.message, err.stack)
 })
