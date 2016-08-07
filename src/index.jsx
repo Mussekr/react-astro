@@ -8,6 +8,7 @@ var MenuItem = require('react-bootstrap').MenuItem;
 var Grid = require('react-bootstrap').Grid;
 var Row = require('react-bootstrap').Row;
 var Col = require('react-bootstrap').Col;
+var Image = require('react-bootstrap').Image;
 /*
 var Hello = React.createClass({
 	displayName: 'Hello',
@@ -37,11 +38,24 @@ var GridInstance = React.createClass({
 		return (
 			<Grid>
 				<Row>
-					<Col md={2}></Col>
-					<Col md={8}><NavbarInstance /></Col>
-					<Col md={2}></Col>
+					<Col md={1}></Col>
+					<Col md={10}><NavbarInstance username="Musse" /></Col>
+					<Col md={1}></Col>
+				</Row>
+				<Row>
+					<Col md={1}></Col>
+					<Col md={10}><ImageThumbnail image="/api/image/1/thumbnail" /><ImageThumbnail image="/api/image/1/thumbnail" /><ImageThumbnail image="/api/image/1/thumbnail" /><ImageThumbnail image="/api/image/1/thumbnail" /><ImageThumbnail image="/api/image/1/thumbnail" /><ImageThumbnail image="/api/image/1/thumbnail" /></Col>
+					<Col md={1}></Col>
 				</Row>
 			</Grid>
+		);
+	}
+});
+var ImageThumbnail = React.createClass({
+	displayName: 'Image',
+	render: function() {
+		return (
+			<Image src={this.props.image} thumbnail responsive />
 		);
 	}
 });
@@ -53,7 +67,7 @@ var NavbarInstance = React.createClass({
 			<Navbar.Header>
 				<Navbar.Brand>
 					<a href="#"><b>Astrogallery</b></a>
-					</Navbar.Brand>
+				</Navbar.Brand>
 				<Navbar.Toggle />
 			</Navbar.Header>
 			<Navbar.Collapse>
@@ -61,8 +75,8 @@ var NavbarInstance = React.createClass({
 					<NavItem eventKey={1} href="#">Link</NavItem>
 					<NavItem eventKey={2} href="#">Link</NavItem>
 				</Nav>
-				<Nav pullRight>
-					<NavDropdown eventKey={3} title="Username" id="basic-nav-dropdown">
+				<Nav>
+					<NavDropdown eventKey={3} title={this.props.username} id="basic-nav-dropdown">
 						<MenuItem eventKey={3.1}>Action</MenuItem>
 						<MenuItem eventKey={3.2}>Another action</MenuItem>
 						<MenuItem eventKey={3.3}>Something else here</MenuItem>
