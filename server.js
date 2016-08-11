@@ -24,7 +24,23 @@ var config = {
 var pool =	new pg.Pool(config);
 
 app.use(express.static(__dirname + '/'));
-
+app.get('/api/image/newest', function(req, res) {
+	pool.connect(function(err, client, done) {
+		if(err) {
+			res.status(500).json({success: false, error: err});
+			return;
+		}
+		client.query('SELECT id FROM public.images ORDER BY created DESC LIMIT 5', function (err, result) {
+			done();
+			if(err) {
+				res.status(500).json({success: false, error: err});
+			}
+			if(result.rows.length > 0) {
+				res.json(result.rows);
+			}
+		});
+	});
+});
 app.get('/api/image/:id', function(req, res) {
 
 	pool.connect(function(err, client, done) {
@@ -53,13 +69,14 @@ app.get('/api/image/:id', function(req, res) {
 		});
 	});
 });
+
 app.get('/api/image/:id/details', function(req, res) {
 	pool.connect(function(err, client, done) {
 		if(err) {
 			res.status(500).json({success: false, error: err});
 			return;
 		}
-		client.query('SELECT id,name FROM public.images WHERE id = $1', [req.params.id], function(err, result) {
+		client.query('SELECT id,name, mimetype, created FROM public.images WHERE id = $1', [req.params.id], function(err, result) {
 			if(err) {
 				res.status(500).json({success: false, error: err});
 				return;
@@ -102,15 +119,13 @@ app.post('/api/login', function(req, res) {
 });
 
 app.post('/api/upload', upload.single('image'), function(req, res) {
-	console.log(req.file.buffer);
-	console.log(req.body.name);
 	pool.connect(function(err, client, done) {
 		if(err) {
 			res.status(500).json({success: false, error: err});
 			return;
 		}
 		createThumbnail(req.file.buffer, req.file.mimetype, 200, 200).then(thumbnail => {
-			client.query('INSERT INTO public.images (name, image, thumbnail, mimetype) VALUES ($1, $2, $3, $4) RETURNING id', [req.body.name, req.file.buffer, thumbnail, req.file.mimetype], function(err, result) {
+			client.query('INSERT INTO public.images (name, image, thumbnail, mimetype, created) VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP) RETURNING id', [req.body.name, req.file.buffer, thumbnail, req.file.mimetype], function(err, result) {
 				done();
 				if(err) {
 					res.status(500).json({success: false, error: err});
