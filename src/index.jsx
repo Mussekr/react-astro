@@ -9,6 +9,11 @@ var Grid = require('react-bootstrap').Grid;
 var Row = require('react-bootstrap').Row;
 var Col = require('react-bootstrap').Col;
 var Image = require('react-bootstrap').Image;
+var Form = require('react-bootstrap').Form;
+var FormGroup = require('react-bootstrap').FormGroup;
+var FormControl = require('react-bootstrap').FormControl;
+var Button = require('react-bootstrap').Button;
+var Collapse = require('react-bootstrap').Collapse;
 /*
 var Hello = React.createClass({
 	displayName: 'Hello',
@@ -32,25 +37,43 @@ ReactDOM.render(
 	<Hello value="World" />,
 	document.getElementById('container')
 );*/
+var LoginForm = React.createClass({
+	render: function() {
+		return (
+			<Form inline>
+				<FormGroup controlId="username">
+					<FormControl type="text" placeholder="Username" />
+				</FormGroup>
+				<FormGroup controlId="password">
+					<FormControl type="password" placeholder="Password" />
+				</FormGroup>
+				<Button type="submit">
+					Login
+				</Button>
+			</Form>
+		);
+	}
+});
 var GridInstance = React.createClass({
 	displayName: 'GridInstance',
 	render: function() {
 		return (
 			<Grid>
 				<Row>
-					<Col md={1}></Col>
-					<Col md={10}><NavbarInstance username="Musse" /></Col>
-					<Col md={1}></Col>
+					<Col xs={0} md={0}></Col>
+					<Col xs={12} md={12} bsClass="col-centered"><NavbarInstance username="Musse" /></Col>
+					<Col xs={0} md={0}></Col>
 				</Row>
 				<Row>
-					<Col md={1}></Col>
-					<Col md={10}><ImageThumbnail image="/api/image/1/thumbnail" /><ImageThumbnail image="/api/image/1/thumbnail" /><ImageThumbnail image="/api/image/1/thumbnail" /><ImageThumbnail image="/api/image/1/thumbnail" /><ImageThumbnail image="/api/image/1/thumbnail" /><ImageThumbnail image="/api/image/1/thumbnail" /></Col>
-					<Col md={1}></Col>
+					<Col xs={0} md={0}></Col>
+					<Col xs={12} md={12}><div className="col-centered"><ImageThumbnail image="/api/image/1/thumbnail" /><ImageThumbnail image="/api/image/1/thumbnail" /><ImageThumbnail image="/api/image/1/thumbnail" /><ImageThumbnail image="/api/image/1/thumbnail" /><ImageThumbnail image="/api/image/1/thumbnail" /><ImageThumbnail image="/api/image/3/thumbnail" /><ImageThumbnail image="/api/image/3/thumbnail" /><ImageThumbnail image="/api/image/3/thumbnail" /><ImageThumbnail image="/api/image/3/thumbnail" /><ImageThumbnail image="/api/image/3/thumbnail" /></div></Col>
+					<Col xs={0} md={0}></Col>
 				</Row>
 			</Grid>
 		);
 	}
 });
+
 var ImageThumbnail = React.createClass({
 	displayName: 'Image',
 	render: function() {
@@ -61,6 +84,9 @@ var ImageThumbnail = React.createClass({
 });
 var NavbarInstance = React.createClass({
 	displayName: 'NavbarInstance',
+	getInitialState: function() {
+		return {open: false};
+	},
 	render: function() {
 		return (
 			<Navbar inverse>
@@ -84,6 +110,12 @@ var NavbarInstance = React.createClass({
 						<MenuItem eventKey={3.3}>Separated link</MenuItem>
 					</NavDropdown>
 				</Nav>
+				<Nav>
+					<NavItem href="#" eventKey={4} onClick={ ()=> this.setState({ open: !this.state.open })}>login</NavItem>
+				</Nav>
+				<Collapse in={this.state.open}>
+					<LoginForm />
+				</Collapse>
 			</Navbar.Collapse>
 			</Navbar>
 		);
@@ -92,5 +124,5 @@ var NavbarInstance = React.createClass({
 
 ReactDOM.render(
 	<GridInstance />,
-	document.getElementById('container')
+	document.getElementById('app')
  );
