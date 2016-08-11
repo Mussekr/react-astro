@@ -15,7 +15,7 @@
     "postinstall": "webpack -p",
     "prod-migrate": "npm run migrate -- up -e prod",
     "migrate": "db-migrate",
-    "heroku-postbuild": "npm run prod-migrate"
+    "heroku-postbuild": "npm run migrate -- up -e prod"
   },
   "author": "",
   "license": "ISC",
