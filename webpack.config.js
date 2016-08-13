@@ -1,13 +1,22 @@
+/* eslint-env node */
+
 module.exports = {
   entry: [
     './src/index.jsx'
   ],
   output: {
-    path: __dirname,
+    path: __dirname + '/public',
     publicPath: '/',
     filename: 'bundle.js'
   },
   module: {
+    preLoaders: [
+      {
+        test: /\.jsx?$/,
+        loader: 'eslint-loader',
+        exclude: /node_modules/
+      }
+    ],
     loaders: [{
       test: /\.jsx?$/,
       exclude: /node_modules/,
@@ -18,7 +27,7 @@ module.exports = {
     },
     {
       test: /\.scss$/,
-      loaders: ["style", "css", "sass"]
+      loaders: ['style', 'css', 'sass']
     }]
   },
   resolve: {
