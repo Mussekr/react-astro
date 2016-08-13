@@ -23,7 +23,7 @@ var config = {
 };
 var pool =	new pg.Pool(config);
 
-app.use(express.static(__dirname + '/'));
+app.use(express.static(__dirname + '/../public/'));
 app.get('/api/image/newest', function(req, res) {
 	pool.connect(function(err, client, done) {
 		if(err) {
