@@ -1,21 +1,23 @@
-var React = require('react');
-var ReactDOM = require('react-dom');
-var Navbar = require('react-bootstrap').Navbar;
-var Nav = require('react-bootstrap').Nav;
-var NavItem = require('react-bootstrap').NavItem;
-var NavDropdown = require('react-bootstrap').NavDropdown;
-var MenuItem = require('react-bootstrap').MenuItem;
-var Grid = require('react-bootstrap').Grid;
-var Row = require('react-bootstrap').Row;
-var Col = require('react-bootstrap').Col;
-var Image = require('react-bootstrap').Image;
-var Form = require('react-bootstrap').Form;
-var FormGroup = require('react-bootstrap').FormGroup;
-var FormControl = require('react-bootstrap').FormControl;
-var Button = require('react-bootstrap').Button;
-var Collapse = require('react-bootstrap').Collapse;
+const React = require('react');
+const ReactDOM = require('react-dom');
+const {
+  Navbar,
+  Nav,
+  NavItem,
+  NavDropdown,
+  MenuItem,
+  Grid,
+  Row,
+  Col,
+  Image,
+  Form,
+  FormGroup,
+  FormControl,
+  Button,
+  Collapse
+} = require('react-bootstrap');
 
-var LoginForm = React.createClass({
+const LoginForm = React.createClass({
   render: function() {
     return (
       <Form inline>
@@ -32,7 +34,7 @@ var LoginForm = React.createClass({
     );
   }
 });
-var GridInstance = React.createClass({
+const GridInstance = React.createClass({
   displayName: 'GridInstance',
   render: function() {
     return (
@@ -65,7 +67,7 @@ var GridInstance = React.createClass({
   }
 });
 
-var ImageThumbnail = React.createClass({
+const ImageThumbnail = React.createClass({
   displayName: 'Image',
   propTypes: {
     image: React.PropTypes.string.isRequired
@@ -76,7 +78,7 @@ var ImageThumbnail = React.createClass({
     );
   }
 });
-var NavbarInstance = React.createClass({
+const NavbarInstance = React.createClass({
   displayName: 'NavbarInstance',
   propTypes: {
     username: React.PropTypes.string.isRequired
