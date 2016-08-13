@@ -14,6 +14,7 @@ var FormGroup = require('react-bootstrap').FormGroup;
 var FormControl = require('react-bootstrap').FormControl;
 var Button = require('react-bootstrap').Button;
 var Collapse = require('react-bootstrap').Collapse;
+
 /*
 var Hello = React.createClass({
 	displayName: 'Hello',
@@ -37,6 +38,7 @@ ReactDOM.render(
 	<Hello value="World" />,
 	document.getElementById('container')
 );*/
+
 var LoginForm = React.createClass({
 	render: function() {
 		return (
@@ -111,7 +113,7 @@ var NavbarInstance = React.createClass({
 					</NavDropdown>
 				</Nav>
 				<Nav>
-					<NavItem href="#" eventKey={4} onClick={ ()=> this.setState({ open: !this.state.open })}>login</NavItem>
+					<NavItem href="#" eventKey={4} onClick={ () => this.setState({ open: !this.state.open })}>login</NavItem>
 				</Nav>
 				<Collapse in={this.state.open}>
 					<LoginForm />
