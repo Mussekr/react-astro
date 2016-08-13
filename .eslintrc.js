@@ -4,7 +4,7 @@ module.exports = {
         "commonjs": true,
         "es6": true
     },
-    "extends": "eslint:recommended",
+    "extends": ["eslint:recommended", "plugin:react/recommended"],
     "parserOptions": {
         "ecmaFeatures": {
             "experimentalObjectRestSpread": true,
@@ -252,8 +252,6 @@ module.exports = {
         "yoda": [
             "error",
             "never"
-        ],
-        "react/react-in-jsx-scope": "error",
-        "react/jsx-uses-vars": "error"
+        ]
     }
 };

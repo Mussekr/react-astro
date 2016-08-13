@@ -78,6 +78,9 @@ var GridInstance = React.createClass({
 
 var ImageThumbnail = React.createClass({
   displayName: 'Image',
+  propTypes: {
+    image: React.PropTypes.string.isRequired
+  },
   render: function() {
     return (
       <Image src={this.props.image} thumbnail responsive />
@@ -86,6 +89,9 @@ var ImageThumbnail = React.createClass({
 });
 var NavbarInstance = React.createClass({
   displayName: 'NavbarInstance',
+  propTypes: {
+    username: React.PropTypes.string.isRequired
+  },
   getInitialState: function() {
     return {open: false};
   },
