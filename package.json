@@ -31,21 +31,21 @@
     "express": "^4.13.3",
     "jimp": "^0.2.24",
     "multer": "^1.1.0",
+    "node-sass": "^3.8.0",
     "passport": "^0.3.2",
     "pg": "6.0.3",
     "react": "^0.14.3",
     "react-bootstrap": "^0.30.2",
     "react-dom": "^0.14.3",
-    "webpack": "^1.12.9",
-    "whatwg-fetch": "^1.0.0",
     "sass-loader": "^4.0.0",
-    "node-sass": "^3.8.0"
+    "sodium": "^1.1.12",
+    "webpack": "^1.12.9",
+    "whatwg-fetch": "^1.0.0"
   },
   "keywords": [
     "react"
   ],
   "devDependencies": {
     "nodemon": "^1.10.0"
-
   }
 }
