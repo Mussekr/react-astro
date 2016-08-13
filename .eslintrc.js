@@ -252,6 +252,7 @@ module.exports = {
         "yoda": [
             "error",
             "never"
-        ]
+        ],
+        "no-multi-comp": "off" // TODO change to "error" after splitting index.jsx
     }
 };
