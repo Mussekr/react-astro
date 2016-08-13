@@ -77,6 +77,7 @@ app.get('/api/image/:id/details', function(req, res) {
 			return;
 		}
 		client.query('SELECT id,name, mimetype, created FROM public.images WHERE id = $1', [req.params.id], function(err, result) {
+			done();
 			if(err) {
 				res.status(500).json({success: false, error: err});
 				return;
@@ -97,6 +98,7 @@ app.get('/api/image/:id/thumbnail', function(req, res) {
 			return;
 		}
 		client.query('SELECT thumbnail, mimetype FROM public.images WHERE id = $1', [req.params.id], function(err, result) {
+			done();
 			if(err) {
 				res.status(500).json({success: false, error: err});
 				return;
