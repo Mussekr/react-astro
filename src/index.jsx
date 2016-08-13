@@ -44,7 +44,20 @@ var GridInstance = React.createClass({
         </Row>
         <Row>
           <Col xs={0} md={0}></Col>
-          <Col xs={12} md={12}><div className="col-centered"><ImageThumbnail image="/api/image/1/thumbnail" /><ImageThumbnail image="/api/image/1/thumbnail" /><ImageThumbnail image="/api/image/1/thumbnail" /><ImageThumbnail image="/api/image/1/thumbnail" /><ImageThumbnail image="/api/image/1/thumbnail" /><ImageThumbnail image="/api/image/3/thumbnail" /><ImageThumbnail image="/api/image/3/thumbnail" /><ImageThumbnail image="/api/image/3/thumbnail" /><ImageThumbnail image="/api/image/3/thumbnail" /><ImageThumbnail image="/api/image/3/thumbnail" /></div></Col>
+          <Col xs={12} md={12}>
+            <div className="col-centered">
+              <ImageThumbnail image="/api/image/1/thumbnail" />
+              <ImageThumbnail image="/api/image/1/thumbnail" />
+              <ImageThumbnail image="/api/image/1/thumbnail" />
+              <ImageThumbnail image="/api/image/1/thumbnail" />
+              <ImageThumbnail image="/api/image/1/thumbnail" />
+              <ImageThumbnail image="/api/image/3/thumbnail" />
+              <ImageThumbnail image="/api/image/3/thumbnail" />
+              <ImageThumbnail image="/api/image/3/thumbnail" />
+              <ImageThumbnail image="/api/image/3/thumbnail" />
+              <ImageThumbnail image="/api/image/3/thumbnail" />
+            </div>
+          </Col>
           <Col xs={0} md={0}></Col>
         </Row>
       </Grid>
