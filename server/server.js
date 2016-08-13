@@ -111,7 +111,7 @@ app.get('/api/image/:id/thumbnail', function(req, res) {
         });
         res.end(img);
       } else {
-        res.status(400).json({success: false, error: 'image not found!'});
+        res.status(404).json({success: false, error: 'image not found!'});
       }
     });
   });
