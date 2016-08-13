@@ -48,16 +48,16 @@ const GridInstance = React.createClass({
           <Col xs={0} md={0}></Col>
           <Col xs={12} md={12}>
             <div className="col-centered">
-              <ImageThumbnail image="/api/image/1/thumbnail" />
-              <ImageThumbnail image="/api/image/1/thumbnail" />
-              <ImageThumbnail image="/api/image/1/thumbnail" />
-              <ImageThumbnail image="/api/image/1/thumbnail" />
-              <ImageThumbnail image="/api/image/1/thumbnail" />
-              <ImageThumbnail image="/api/image/3/thumbnail" />
-              <ImageThumbnail image="/api/image/3/thumbnail" />
-              <ImageThumbnail image="/api/image/3/thumbnail" />
-              <ImageThumbnail image="/api/image/3/thumbnail" />
-              <ImageThumbnail image="/api/image/3/thumbnail" />
+              <ImageThumbnail image="1" />
+              <ImageThumbnail image="1" />
+              <ImageThumbnail image="1" />
+              <ImageThumbnail image="1" />
+              <ImageThumbnail image="1" />
+              <ImageThumbnail image="4" />
+              <ImageThumbnail image="5" />
+              <ImageThumbnail image="6" />
+              <ImageThumbnail image="3" />
+              <ImageThumbnail image="3" />
             </div>
           </Col>
           <Col xs={0} md={0}></Col>
@@ -74,7 +74,7 @@ const ImageThumbnail = React.createClass({
   },
   render: function() {
     return (
-      <Image src={this.props.image} thumbnail responsive />
+      <Image src={'/api/image/' + this.props.image + '/thumbnail'} thumbnail responsive />
     );
   }
 });
