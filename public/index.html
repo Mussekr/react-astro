@@ -6,9 +6,20 @@
 		</title>
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/latest/css/bootstrap.min.css">
 		<style type="text/css">
-			.col-centered {
-				float: none;
-				margin: 0 auto;
+			.flexbox-images {
+				display: flex;
+				flex-wrap: wrap;
+				justify-content: center;
+			}
+			.image-hover figure img {
+				-webkit-filter: grayscale(0) blur(0);
+				filter:grayscale(0) blur(0);
+				-webkit-transition: .3s ease-in-out;
+				transition: .3s ease-in-out;
+			}
+			.image-hover figure:hover img {
+				-webkit-filter: grayscale(100%) blur(3px);
+				filter:grayscale(100%) blur(3px);
 			}
 		</style>
 	</head>

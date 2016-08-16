@@ -1,3 +1,4 @@
+require('../public/scss/imagehover.scss');
 const React = require('react');
 const ReactDOM = require('react-dom');
 const {
@@ -47,7 +48,7 @@ const GridInstance = React.createClass({
         <Row>
           <Col xs={0} md={0}></Col>
           <Col xs={12} md={12}>
-            <div className="col-centered">
+            <div className="flexbox-images">
               <ImageThumbnail image="1" />
               <ImageThumbnail image="1" />
               <ImageThumbnail image="1" />
@@ -74,7 +75,14 @@ const ImageThumbnail = React.createClass({
   },
   render: function() {
     return (
-      <Image src={'/api/image/' + this.props.image + '/thumbnail'} thumbnail responsive />
+      <figure className="imghvr-shutter-out-vert">
+        <Image src={'/api/image/' + this.props.image + '/thumbnail'} thumbnail responsive />
+        <figcaption>
+          <li>M33</li>
+          <li>27.03.2016</li>
+        </figcaption>
+        <a href="#"></a>
+      </figure>
     );
   }
 });
