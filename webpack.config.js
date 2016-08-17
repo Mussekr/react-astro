@@ -1,4 +1,5 @@
 /* eslint-env node */
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 module.exports = {
   entry: [
@@ -27,10 +28,15 @@ module.exports = {
     },
     {
       test: /\.scss$/,
-      loaders: ['style', 'css', 'sass']
+      loader: ExtractTextPlugin.extract('css!sass')
     }]
   },
   resolve: {
     extensions: ['', '.js', '.jsx', '.scss']
-  }
+  },
+  plugins: [
+    new ExtractTextPlugin('style.css', {
+      allChunks: true
+    })
+  ]
 };
