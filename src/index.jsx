@@ -42,23 +42,25 @@ const GridInstance = React.createClass({
       <Grid>
         <Row>
           <Col xs={0} md={0}></Col>
-          <Col xs={12} md={12} bsClass="col-centered"><NavbarInstance username="Musse" /></Col>
+          <Col xs={12} md={12}><NavbarInstance username="Musse" /></Col>
           <Col xs={0} md={0}></Col>
         </Row>
         <Row>
           <Col xs={0} md={0}></Col>
           <Col xs={12} md={12}>
+          <h2>Newest images</h2>
             <div className="flexbox-images">
               <ImageThumbnail image="1" />
               <ImageThumbnail image="1" />
               <ImageThumbnail image="1" />
               <ImageThumbnail image="1" />
               <ImageThumbnail image="1" />
-              <ImageThumbnail image="4" />
-              <ImageThumbnail image="5" />
-              <ImageThumbnail image="6" />
-              <ImageThumbnail image="3" />
-              <ImageThumbnail image="3" />
+            </div>
+            <h2>Categories</h2>
+            <div className="flexbox-images">
+              <CategoryThumbnail link="/category/1" image="3" />
+              <CategoryThumbnail link="/category/2" image="4" />
+              <CategoryThumbnail link="/category/3" image="6" />
             </div>
           </Col>
           <Col xs={0} md={0}></Col>
@@ -67,7 +69,14 @@ const GridInstance = React.createClass({
     );
   }
 });
-
+const CategoryThumbnail = React.createClass({
+  displayName: 'CategoryThumbnail',
+  render: function() {
+    return (
+      <a href={this.props.link}><Image src={'/api/image/' + this.props.image + '/thumbnail'} thumbnail responsive /></a>
+    );
+  }
+});
 const ImageThumbnail = React.createClass({
   displayName: 'Image',
   propTypes: {
@@ -75,7 +84,7 @@ const ImageThumbnail = React.createClass({
   },
   render: function() {
     return (
-      <figure className="imghvr-shutter-out-vert">
+      <figure className="imghvr-shutter-out-vert img-responsive img-thumbnail">
         <Image src={'/api/image/' + this.props.image + '/thumbnail'} thumbnail responsive />
         <figcaption>
           <li>M33</li>

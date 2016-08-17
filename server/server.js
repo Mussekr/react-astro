@@ -6,6 +6,9 @@ const Jimp = require('jimp');
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 const process = require('process');
+const passport = require('passport'),
+  LocalStrategy = require('passport-local').Strategy;
+const bcrypt = require('bcrypt');
 
 function createThumbnail(image, mime, maxWidth, maxHeight) {
   return new Promise(function(resolve, reject) {
@@ -15,13 +18,47 @@ function createThumbnail(image, mime, maxWidth, maxHeight) {
     });
   });
 }
-
+const saltRounds = 10;
 const config = {
   max: 20, // max number of clients in the pool
   idleTimeoutMillis: 30000, // how long a client is allowed to remain idle before being closed
   host: process.env.PGHOST || 'localhost'
 };
 const pool = new pg.Pool(config);
+
+passport.use(
+  'local-login',
+  new LocalStrategy({
+    usernameField: 'username',
+    passwordField: 'pwd',
+    passReqToCallback: true
+  },
+  function(req, username, password, done) {
+    pool.connect(function(err, client, doneSql) {
+      if(err) {
+        return done(err);
+      }
+      client.query('SELECT * FROM public.users WHERE username = $1', [username], function(err, result) {
+        doneSql();
+        if(err) {
+          return done(err);
+        }
+        if(!result.rows.length) {
+          return done(null, false, {message: 'Wrong username/password! Try again!'});
+        }
+        bcrypt.compare(password, result.rows[0], function(err, res) {
+          if(err) {
+            return done(err);
+          }
+          if(!res) {
+            return done(null, false, {message: 'Wrong username/password! Try again!'});
+          }
+        });
+        return done(null, result.rows[0]);
+      });
+    });
+  })
+);
 
 app.use(express.static(__dirname + '/../public/'));
 app.get('/api/image/newest', function(req, res) {
@@ -37,8 +74,20 @@ app.get('/api/image/newest', function(req, res) {
       }
       if(result.rows.length > 0) {
         res.json(result.rows);
+      } else {
+        res.status(404).json({success: false, error: 'images not found!'});
+        return;
       }
     });
+  });
+});
+app.get('/api/generatehash/:password', function(req, res) {
+  bcrypt.hash(req.params.password, saltRounds, function(err, hash) {
+    if(err) {
+      res.status(500).json({success: false, error: err});
+      return;
+    }
+    res.json({password: req.params.password, hash: hash});
   });
 });
 app.get('/api/image/:id', function(req, res) {
@@ -63,7 +112,7 @@ app.get('/api/image/:id', function(req, res) {
         });
         res.end(img);
       } else {
-        res.json({success: false, error: 'image not found!'});
+        res.status(404).json({success: false, error: 'image not found!'});
         return;
       }
     });
@@ -85,7 +134,7 @@ app.get('/api/image/:id/details', function(req, res) {
       if(result.rows.length > 0) {
         res.json(result.rows[0]);
       } else {
-        res.status(500).json({success: false, error: 'Image not found!'});
+        res.status(404).json({success: false, error: 'Image not found!'});
         return;
       }
     });
@@ -116,8 +165,21 @@ app.get('/api/image/:id/thumbnail', function(req, res) {
     });
   });
 });
-app.post('/api/login', function(req, res) {
-  res.json({success: true});
+app.post('/api/login', function(req, res, next) {
+  passport.authenticate('local-login', function(err, user, info) {
+    if(err) {
+      return next(err);
+    }
+    if(!user) {
+      return res.json({success: false, error: 'Wrong username/password!'});
+    }
+    req.logIn(user, function(err) {
+      if(err) {
+        return next(err);
+      }
+      return res.redirect('/');
+    });
+  })(req, res, next);
 });
 
 app.post('/api/upload', upload.single('image'), function(req, res) {
