@@ -1,4 +1,5 @@
 require('../public/scss/imagehover.scss');
+require('../public/scss/style.scss');
 const React = require('react');
 const ReactDOM = require('react-dom');
 const {
@@ -50,17 +51,17 @@ const GridInstance = React.createClass({
           <Col xs={12} md={12}>
           <h2>Newest images</h2>
             <div className="flexbox-images">
-              <ImageThumbnail image="1" />
-              <ImageThumbnail image="1" />
-              <ImageThumbnail image="1" />
-              <ImageThumbnail image="1" />
-              <ImageThumbnail image="1" />
+              <ImageThumbnail image="1" author="Musse" object="IC 5146" date="21.8.2015"/>
+              <ImageThumbnail image="1" author="Musse" object="IC 5146" date="21.8.2015"/>
+              <ImageThumbnail image="1" author="Musse" object="IC 5146" date="21.8.2015"/>
+              <ImageThumbnail image="1" author="Musse" object="IC 5146" date="21.8.2015"/>
+              <ImageThumbnail image="1" author="Musse" object="IC 5146" date="21.8.2015"/>
             </div>
             <h2>Categories</h2>
             <div className="flexbox-images">
-              <CategoryThumbnail link="/category/1" image="3" />
-              <CategoryThumbnail link="/category/2" image="4" />
-              <CategoryThumbnail link="/category/3" image="6" />
+              <CategoryThumbnail link="/category/1" image="3" name="Nebulas" />
+              <CategoryThumbnail link="/category/2" image="4" name="Galaxies" />
+              <CategoryThumbnail link="/category/3" image="6" name="Best of" />
             </div>
           </Col>
           <Col xs={0} md={0}></Col>
@@ -71,24 +72,36 @@ const GridInstance = React.createClass({
 });
 const CategoryThumbnail = React.createClass({
   displayName: 'CategoryThumbnail',
+  propTypes: {
+    image: React.PropTypes.string.isRequired,
+    link: React.PropTypes.string.isRequired,
+    name: React.PropTypes.string.isRequired
+  },
   render: function() {
     return (
-      <a href={this.props.link}><Image src={'/api/image/' + this.props.image + '/thumbnail'} thumbnail responsive /></a>
+      <a className="category-padding" href={this.props.link}>
+        <Image src={'/api/image/' + this.props.image + '/thumbnail'} thumbnail responsive />
+        <h3 className="category-margin">{this.props.name}</h3>
+      </a>
     );
   }
 });
 const ImageThumbnail = React.createClass({
   displayName: 'Image',
   propTypes: {
-    image: React.PropTypes.string.isRequired
+    image: React.PropTypes.string.isRequired,
+    author: React.PropTypes.string.isRequired,
+    object: React.PropTypes.string.isRequired,
+    date: React.PropTypes.string.isRequired
   },
   render: function() {
     return (
       <figure className="imghvr-shutter-out-vert img-responsive img-thumbnail">
-        <Image src={'/api/image/' + this.props.image + '/thumbnail'} thumbnail responsive />
+        <Image src={'/api/image/' + this.props.image + '/thumbnail'} responsive />
         <figcaption>
-          <li>M33</li>
-          <li>27.03.2016</li>
+          <li>{this.props.author}</li>
+          <li>{this.props.object}</li>
+          <li>{this.props.date}</li>
         </figcaption>
         <a href="#"></a>
       </figure>

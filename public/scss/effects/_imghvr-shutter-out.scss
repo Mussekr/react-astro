@@ -4,7 +4,7 @@
 	&:before {
 		background: $figcaption-bg;
 		position: absolute;
-		content: ''; 
+		content: '';
 		@include transition-delay($transition-duration * 0.3);
 	}
 	figcaption {
@@ -13,6 +13,7 @@
 	}
 	&:hover {
 		&:before {
+			opacity: 0.1;
 			@include transition-delay(0s);
 		}
 		figcaption {

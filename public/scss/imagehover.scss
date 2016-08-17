@@ -9,13 +9,13 @@
  */
  @import "bourbon/bourbon";
 
-$image-bg: #2266a5;
-$figcaption-bg: #135796;
+$image-bg: #ffffff;
+$figcaption-bg: #000000;
 $figcaption-padding: 30px;
 $text-color: #ffffff;
 $border-color: #ffffff;
-$border-margin: 5px;
-$border-width: 4px;
+$border-margin: 0px;
+$border-width: 0px;
 $transition-duration: 0.35s;
 $shift-distance: 10px;
 
@@ -24,7 +24,7 @@ $shift-distance: 10px;
   top: $padding;
   bottom: $padding;
   left: $padding;
-  right: $padding; 
+  right: $padding;
 }
 
 [class^='imghvr-'],[class*=' imghvr-'] {
@@ -49,6 +49,7 @@ $shift-distance: 10px;
       padding: 30px;
       @include fill;
       color: $text-color;
+      font-size: 16px;
       h1, h2, h3, h4, h5, h6 {
         color: $text-color;
       }
@@ -59,9 +60,9 @@ $shift-distance: 10px;
     }
 }
 
-[class^='imghvr-'], [class*=' imghvr-'], [class^='imghvr-']:before, 
-[class^='imghvr-']:after, [class*=' imghvr-']:before, [class*=' imghvr-']:after, 
-[class^='imghvr-'] *, [class*=' imghvr-'] *, [class^='imghvr-'] *:before, 
+[class^='imghvr-'], [class*=' imghvr-'], [class^='imghvr-']:before,
+[class^='imghvr-']:after, [class*=' imghvr-']:before, [class*=' imghvr-']:after,
+[class^='imghvr-'] *, [class*=' imghvr-'] *, [class^='imghvr-'] *:before,
 [class^='imghvr-'] *:after, [class*=' imghvr-'] *:before, [class*=' imghvr-'] *:after {
   box-sizing: border-box;
   @include transition (all 0.35s ease);
