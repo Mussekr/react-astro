@@ -1,5 +1,5 @@
-require('../public/scss/imagehover.scss');
-require('../public/scss/style.scss');
+require('./scss/imagehover.scss');
+require('./scss/style.scss');
 const React = require('react');
 const ReactDOM = require('react-dom');
 const {
