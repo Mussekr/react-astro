@@ -8,7 +8,8 @@ const upload = multer({ storage: storage });
 const process = require('process');
 const passport = require('passport'),
   LocalStrategy = require('passport-local').Strategy;
-const bcrypt = require('bcrypt');
+const Promise = require('bluebird');
+const bcrypt = Promise.promisifyAll(require('bcrypt'));
 
 function createThumbnail(image, mime, maxWidth, maxHeight) {
   return new Promise(function(resolve, reject) {
@@ -18,7 +19,10 @@ function createThumbnail(image, mime, maxWidth, maxHeight) {
     });
   });
 }
-const saltRounds = 10;
+function addBcryptType(err) {
+  err.type = 'bcryptError';
+  throw err;
+}
 const config = {
   max: 20, // max number of clients in the pool
   idleTimeoutMillis: 30000, // how long a client is allowed to remain idle before being closed
@@ -46,15 +50,15 @@ passport.use(
         if(!result.rows.length) {
           return done(null, false, {message: 'Wrong username/password! Try again!'});
         }
-        bcrypt.compare(password, result.rows[0], function(err, res) {
-          if(err) {
-            return done(err);
-          }
-          if(!res) {
+        Promise.try(function() {
+          return bcrypt.compareAsync(password, result.rows[0].password).catch(addBcryptType);
+        }).then(function(valid) {
+          if(valid) {
+            return done(null, result.rows[0]);
+          } else {
             return done(null, false, {message: 'Wrong username/password! Try again!'});
           }
         });
-        return done(null, result.rows[0]);
       });
     });
   })
@@ -82,12 +86,10 @@ app.get('/api/image/newest', function(req, res) {
   });
 });
 app.get('/api/generatehash/:password', function(req, res) {
-  bcrypt.hash(req.params.password, saltRounds, function(err, hash) {
-    if(err) {
-      res.status(500).json({success: false, error: err});
-      return;
-    }
-    res.json({password: req.params.password, hash: hash});
+  Promise.try(function() {
+    return bcrypt.hashAsync(req.params.password, 10).catch(addBcryptType);
+  }).then(function(hash) {
+    res.json({password: req.params.password, hahs: hash});
   });
 });
 app.get('/api/image/:id', function(req, res) {
