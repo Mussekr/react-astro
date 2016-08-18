@@ -61,7 +61,7 @@ const NewestImages = React.createClass({
   },
   render: function() {
     let data = this.state.data.map(function(image) {
-      return <ImageThumbnail image={image} author="Musse2" object="IC 5146" date="21.8.2015" />;
+      return <ImageThumbnail image={image.id} author="Musse2" object="IC 5146" date="21.8.2015" />;
     });
     return (
       <div>
@@ -85,7 +85,7 @@ const GridInstance = React.createClass({
           <Col xs={12} md={12}>
           <h2>Newest images</h2>
             <div className="flexbox-images">
-              <NewestImages pollInterval={60000} />
+              <NewestImages pollInterval={20000} />
             </div>
             <h2>Categories</h2>
             <div className="flexbox-images">
