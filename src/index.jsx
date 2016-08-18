@@ -1,8 +1,8 @@
 require('./scss/imagehover.scss');
 require('./scss/style.scss');
+require('whatwg-fetch');
 const React = require('react');
 const ReactDOM = require('react-dom');
-const fetch = require('whatwg-fetch');
 const {
   Navbar,
   Nav,
