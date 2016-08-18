@@ -2,6 +2,7 @@ require('./scss/imagehover.scss');
 require('./scss/style.scss');
 const React = require('react');
 const ReactDOM = require('react-dom');
+const fetch = require('whatwg-fetch');
 const {
   Navbar,
   Nav,
@@ -36,6 +37,32 @@ const LoginForm = React.createClass({
     );
   }
 });
+const NewestImages = React.createClass({
+  displayName: 'NewestImages',
+  loadImagesFromServer: function() {
+    fetch('/api/image/newest').then(function(response) {
+      return response.json();
+    }).then(function(json) {
+      this.setState({data: json});
+    }).catch(function(ex) {
+      console.log('parsing failed', ex);
+    });
+  },
+  getInitialState: function() {
+    return {data: []};
+  },
+  render: function() {
+    return (
+      <div>
+        <ImageThumbnail image="1" author="Musse2" object="IC 5146" date="21.8.2015" />
+        <ImageThumbnail image="1" author="Musse" object="IC 5146" date="21.8.2015"/>
+        <ImageThumbnail image="1" author="Musse" object="IC 5146" date="21.8.2015"/>
+        <ImageThumbnail image="1" author="Musse" object="IC 5146" date="21.8.2015"/>
+        <ImageThumbnail image="1" author="Musse" object="IC 5146" date="21.8.2015"/>
+      </div>
+    );
+  }
+});
 const GridInstance = React.createClass({
   displayName: 'GridInstance',
   render: function() {
@@ -51,15 +78,11 @@ const GridInstance = React.createClass({
           <Col xs={12} md={12}>
           <h2>Newest images</h2>
             <div className="flexbox-images">
-              <ImageThumbnail image="1" author="Musse" object="IC 5146" date="21.8.2015"/>
-              <ImageThumbnail image="1" author="Musse" object="IC 5146" date="21.8.2015"/>
-              <ImageThumbnail image="1" author="Musse" object="IC 5146" date="21.8.2015"/>
-              <ImageThumbnail image="1" author="Musse" object="IC 5146" date="21.8.2015"/>
-              <ImageThumbnail image="1" author="Musse" object="IC 5146" date="21.8.2015"/>
+              <NewestImages />
             </div>
             <h2>Categories</h2>
             <div className="flexbox-images">
-              <CategoryThumbnail link="/category/1" image="3" name="Nebulas" />
+              <CategoryThumbnail link="/category/1" image="3" name="Nebulae" />
               <CategoryThumbnail link="/category/2" image="4" name="Galaxies" />
               <CategoryThumbnail link="/category/3" image="6" name="Best of" />
             </div>
