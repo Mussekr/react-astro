@@ -39,11 +39,15 @@ const LoginForm = React.createClass({
 });
 const NewestImages = React.createClass({
   displayName: 'NewestImages',
+  propTypes: {
+    pollInterval: React.PropTypes.number.isRequired
+  },
   loadImagesFromServer: function() {
     fetch('/api/image/newest').then(function(response) {
       return response.json();
-    }).then(function(json) {
+    }).then(json => {
       this.setState({data: json});
+      console.log(json);
     }).catch(function(ex) {
       console.log('parsing failed', ex);
     });
@@ -51,14 +55,17 @@ const NewestImages = React.createClass({
   getInitialState: function() {
     return {data: []};
   },
+  componentDidMount: function() {
+    this.loadImagesFromServer();
+    setInterval(this.loadImagesFromServer, this.props.pollInterval);
+  },
   render: function() {
+    let data = this.state.data.map(function(image) {
+      return <ImageThumbnail image={image} author="Musse2" object="IC 5146" date="21.8.2015" />;
+    });
     return (
       <div>
-        <ImageThumbnail image="1" author="Musse2" object="IC 5146" date="21.8.2015" />
-        <ImageThumbnail image="1" author="Musse" object="IC 5146" date="21.8.2015"/>
-        <ImageThumbnail image="1" author="Musse" object="IC 5146" date="21.8.2015"/>
-        <ImageThumbnail image="1" author="Musse" object="IC 5146" date="21.8.2015"/>
-        <ImageThumbnail image="1" author="Musse" object="IC 5146" date="21.8.2015"/>
+        {data}
       </div>
     );
   }
@@ -78,7 +85,7 @@ const GridInstance = React.createClass({
           <Col xs={12} md={12}>
           <h2>Newest images</h2>
             <div className="flexbox-images">
-              <NewestImages />
+              <NewestImages pollInterval={60000} />
             </div>
             <h2>Categories</h2>
             <div className="flexbox-images">
