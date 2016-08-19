@@ -181,6 +181,26 @@ app.get('/api/image/:id/thumbnail', function(req, res) {
     });
   });
 });
+app.get('/api/categories', function(req, res) {
+  pool.connect(function(err, client, done) {
+    if(err) {
+      res.status(500).json({success: false, error: err});
+      return;
+    }
+    client.query('SELECT * FROM Categories', function(err, result) {
+      done();
+      if(err) {
+        res.status(500).json({success: false, error: err});
+        return;
+      }
+      if(result.rows.length > 0) {
+        res.json(result.rows);
+      } else {
+        res.json({});
+      }
+    });
+  });
+});
 const placeholderLoginForm = '<html><body><form action="/api/login" method="post">' +
 '<p><input type="text" name="username" placeholder="Username" /></p>' +
 '<p><input type="password" name="pwd" placeholder="Password" /></p><p><input type="submit" /></form></body></html>';

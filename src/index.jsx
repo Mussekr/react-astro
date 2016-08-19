@@ -70,6 +70,38 @@ const NewestImages = React.createClass({
     );
   }
 });
+const Categories = React.createClass({
+  displayName: 'Categories',
+  propTypes: {
+    pollInterval: React.PropTypes.number.isRequired
+  },
+  loadCategoriesFromServer: function() {
+    fetch('/api/categories').then(function(response) {
+      return response.json();
+    }).then(json => {
+      this.setState({data: json});
+    }).catch(function(ex) {
+      console.log('parsing failed', ex);
+    });
+  },
+  getInitialState: function() {
+    return {data: []};
+  },
+  componentDidMount: function() {
+    this.loadCategoriesFromServer();
+    setInterval(this.loadCategoriesFromServer, this.props.pollInterval);
+  },
+  render: function() {
+    let data = this.state.data.map(function(category) {
+      return <CategoryThumbnail key={category.id} image={category.image} link={category.id} name={category.name} />;
+    });
+    return(
+      <div>
+        {data}
+      </div>
+    );
+  }
+});
 const GridInstance = React.createClass({
   displayName: 'GridInstance',
   render: function() {
@@ -89,9 +121,7 @@ const GridInstance = React.createClass({
             </div>
             <h2>Categories</h2>
             <div className="flexbox-images">
-              <CategoryThumbnail link="/category/1" image="3" name="Nebulae" />
-              <CategoryThumbnail link="/category/2" image="4" name="Galaxies" />
-              <CategoryThumbnail link="/category/3" image="6" name="Best of" />
+              <Categories pollInterval={30000} />
             </div>
           </Col>
           <Col xs={0} md={0}></Col>
@@ -103,13 +133,13 @@ const GridInstance = React.createClass({
 const CategoryThumbnail = React.createClass({
   displayName: 'CategoryThumbnail',
   propTypes: {
-    image: React.PropTypes.string.isRequired,
-    link: React.PropTypes.string.isRequired,
+    image: React.PropTypes.number.isRequired,
+    link: React.PropTypes.number.isRequired,
     name: React.PropTypes.string.isRequired
   },
   render: function() {
     return (
-      <a className="category-padding" href={this.props.link}>
+      <a href={'/category/' + this.props.link}>
         <Image src={'/api/image/' + this.props.image + '/thumbnail'} thumbnail responsive />
         <h3 className="category-margin">{this.props.name}</h3>
       </a>
