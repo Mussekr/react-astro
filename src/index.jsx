@@ -1,6 +1,7 @@
 require('./scss/imagehover.scss');
 require('./scss/style.scss');
 require('whatwg-fetch');
+const moment = require('moment');
 const React = require('react');
 const ReactDOM = require('react-dom');
 const {
@@ -47,7 +48,6 @@ const NewestImages = React.createClass({
       return response.json();
     }).then(json => {
       this.setState({data: json});
-      console.log(json);
     }).catch(function(ex) {
       console.log('parsing failed', ex);
     });
@@ -61,7 +61,7 @@ const NewestImages = React.createClass({
   },
   render: function() {
     let data = this.state.data.map(function(image) {
-      return <ImageThumbnail image={image.id} author="Musse2" object="IC 5146" date="21.8.2015" />;
+      return <ImageThumbnail key={image.id} image={image.id} author={image.username} name={image.name} date={moment(image.created).fromNow()} />;
     });
     return (
       <div>
@@ -85,7 +85,7 @@ const GridInstance = React.createClass({
           <Col xs={12} md={12}>
           <h2>Newest images</h2>
             <div className="flexbox-images">
-              <NewestImages pollInterval={20000} />
+              <NewestImages pollInterval={30000} />
             </div>
             <h2>Categories</h2>
             <div className="flexbox-images">
@@ -119,9 +119,9 @@ const CategoryThumbnail = React.createClass({
 const ImageThumbnail = React.createClass({
   displayName: 'Image',
   propTypes: {
-    image: React.PropTypes.string.isRequired,
+    image: React.PropTypes.number.isRequired,
     author: React.PropTypes.string.isRequired,
-    object: React.PropTypes.string.isRequired,
+    name: React.PropTypes.string.isRequired,
     date: React.PropTypes.string.isRequired
   },
   render: function() {
@@ -130,7 +130,7 @@ const ImageThumbnail = React.createClass({
         <Image src={'/api/image/' + this.props.image + '/thumbnail'} responsive />
         <figcaption>
           <li>{this.props.author}</li>
-          <li>{this.props.object}</li>
+          <li>{this.props.name}</li>
           <li>{this.props.date}</li>
         </figcaption>
         <a href="#"></a>

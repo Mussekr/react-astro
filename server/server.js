@@ -71,7 +71,8 @@ app.get('/api/image/newest', function(req, res) {
       res.status(500).json({success: false, error: err});
       return;
     }
-    client.query('SELECT id FROM public.images ORDER BY created DESC LIMIT 5', function (err, result) {
+    client.query('SELECT images.id, images.name, images.created, users.username FROM images' +
+    ' INNER JOIN users ON images.userid=users.id ORDER BY images.created DESC LIMIT 5;', function (err, result) {
       done();
       if(err) {
         res.status(500).json({success: false, error: err});
@@ -79,7 +80,7 @@ app.get('/api/image/newest', function(req, res) {
       if(result.rows.length > 0) {
         res.json(result.rows);
       } else {
-        res.status(404).json({success: false, error: 'images not found!'});
+        res.json({});
         return;
       }
     });
@@ -90,6 +91,19 @@ app.get('/api/generatehash/:password', function(req, res) {
     return bcrypt.hashAsync(req.params.password, 10).catch(addBcryptType);
   }).then(function(hash) {
     res.json({password: req.params.password, hahs: hash});
+  });
+});
+app.get('/api/testpassword/:password/:hash', function(req, res) {
+  Promise.try(function() {
+    return bcrypt.compareAsync(req.params.password, req.params.hash).catch(addBcryptType);
+  }).then(function(valid) {
+    if(valid) {
+      res.json({success: true});
+      return;
+    } else {
+      res.json({success: false});
+      return;
+    }
   });
 });
 app.get('/api/image/:id', function(req, res) {
@@ -167,6 +181,12 @@ app.get('/api/image/:id/thumbnail', function(req, res) {
     });
   });
 });
+const placeholderLoginForm = '<html><body><form action="/api/login" method="post">' +
+'<p><input type="text" name="username" placeholder="Username" /></p>' +
+'<p><input type="password" name="pwd" placeholder="Password" /></p><p><input type="submit" /></form></body></html>';
+app.get('/api/login', function(req, res) {
+  res.send(placeholderLoginForm);
+});
 app.post('/api/login', function(req, res, next) {
   passport.authenticate('local-login', function(err, user, info) {
     if(err) {
@@ -183,7 +203,37 @@ app.post('/api/login', function(req, res, next) {
     });
   })(req, res, next);
 });
-
+const registerForm = '<html><body><form action="/api/register" method="post"><input type="text" name="username" placeholder="username" />' +
+'<input type="password" name="password" placeholder="Password" /><input type="submit" /></form></body></html>';
+app.get('/api/register', function(req, res) {
+  res.send(registerForm);
+});
+app.post('/api/register', function(req, res) {
+  Promise.try(function() {
+    return bcrypt.hashAsync(req.body.password, 19).catch(addBcryptType);
+  }).then(function(hash) {
+    pool.connect(function(err, client, done) {
+      if(err) {
+        res.status(500).json({success: false, error: err});
+        return;
+      }
+      client.query('INSERT INTO users (username, password, role) VALUES ($1, $2, $3)', [req.body.username, hash, 0], function(err, result) {
+        done();
+        if(err) {
+          res.status(500).json({success: false, error: err});
+          return;
+        }
+        if(result.rowCount > 0) {
+          res.json({success: true});
+          return;
+        } else {
+          res.json({success: false});
+          return;
+        }
+      });
+    });
+  });
+});
 app.post('/api/upload', upload.single('image'), function(req, res) {
   pool.connect(function(err, client, done) {
     if(err) {
