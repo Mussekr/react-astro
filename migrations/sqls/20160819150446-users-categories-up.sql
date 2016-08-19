@@ -6,7 +6,7 @@ CREATE TABLE categories (
   "name" text,
   "image" bigint,
   PRIMARY KEY ("id")
-)
+);
 INSERT INTO categories ("id", "name", "image") VALUES (1, "Nebulae", 3);
 INSERT INTO categories ("id", "name", "image") VALUES (2, "Galaxies", 4);
 INSERT INTO categories ("id", "name", "image") VALUES (3, "Best of", 6);
