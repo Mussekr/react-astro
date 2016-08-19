@@ -6,8 +6,9 @@ const Jimp = require('jimp');
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 const process = require('process');
-const passport = require('passport'),
-  LocalStrategy = require('passport-local').Strategy;
+const LocalStrategy = require('passport-local').Strategy,
+  passport = require('passport');
+const expressSession = require('express-session');
 const Promise = require('bluebird');
 const bcrypt = Promise.promisifyAll(require('bcrypt'));
 
@@ -29,41 +30,9 @@ const config = {
   host: process.env.PGHOST || 'localhost'
 };
 const pool = new pg.Pool(config);
-
-passport.use(
-  'local-login',
-  new LocalStrategy({
-    usernameField: 'username',
-    passwordField: 'pwd',
-    passReqToCallback: true
-  },
-  function(req, username, password, done) {
-    pool.connect(function(err, client, doneSql) {
-      if(err) {
-        return done(err);
-      }
-      client.query('SELECT * FROM public.users WHERE username = $1', [username], function(err, result) {
-        doneSql();
-        if(err) {
-          return done(err);
-        }
-        if(!result.rows.length) {
-          return done(null, false, {message: 'Wrong username/password! Try again!'});
-        }
-        Promise.try(function() {
-          return bcrypt.compareAsync(password, result.rows[0].password).catch(addBcryptType);
-        }).then(function(valid) {
-          if(valid) {
-            return done(null, result.rows[0]);
-          } else {
-            return done(null, false, {message: 'Wrong username/password! Try again!'});
-          }
-        });
-      });
-    });
-  })
-);
-
+app.use(expressSession({secret: '$2a$10$6BL3hWTTWU5Coi.dmZuBmuSaFHlbpTrzS2BvbaLHcNiyaEuqgClbS'}));
+app.use(passport.initialize());
+app.use(passport.session());
 app.use(express.static(__dirname + '/../public/'));
 app.get('/api/image/newest', function(req, res) {
   pool.connect(function(err, client, done) {
