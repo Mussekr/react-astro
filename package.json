@@ -30,6 +30,8 @@
     "babel-preset-react": "^6.1.18",
     "bcrypt": "^0.8.7",
     "bluebird": "^3.4.1",
+    "body-parser": "^1.15.2",
+    "connect-ensure-login": "^0.1.1",
     "css-loader": "^0.23.1",
     "db-migrate": "^0.9.25",
     "eslint": "^3.3.0",

@@ -13,31 +13,10 @@ const {
   Grid,
   Row,
   Col,
-  Image,
-  Form,
-  FormGroup,
-  FormControl,
-  Button,
   Collapse
 } = require('react-bootstrap');
+const LoginForm = require('./login/LoginForm');
 
-const LoginForm = React.createClass({
-  render: function() {
-    return (
-      <Form inline>
-        <FormGroup controlId="username">
-          <FormControl type="text" placeholder="Username" />
-        </FormGroup>
-        <FormGroup controlId="password">
-          <FormControl type="password" placeholder="Password" />
-        </FormGroup>
-        <Button type="submit">
-          Login
-        </Button>
-      </Form>
-    );
-  }
-});
 const NewestImages = React.createClass({
   displayName: 'NewestImages',
   propTypes: {

@@ -6,10 +6,20 @@ const Jimp = require('jimp');
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 const process = require('process');
-const passport = require('passport'),
-  LocalStrategy = require('passport-local').Strategy;
+const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
 const Promise = require('bluebird');
 const bcrypt = Promise.promisifyAll(require('bcrypt'));
+const Authentication = require('./Authentication');
+const ensureLogin = require('connect-ensure-login');
+const bodyParser = require('body-parser');
+const session = require('express-session');
+const serverConfig = require('./config.json');
+
+const secret = process.env.NODE_ENV === 'production' ? process.env.APP_SECRET : 'dev-secret';
+if (!secret) {
+  throw new Error('Unable to start in production mode with no APP_SECRET set!');
+}
 
 function createThumbnail(image, mime, maxWidth, maxHeight) {
   return new Promise(function(resolve, reject) {
@@ -30,39 +40,17 @@ const config = {
 };
 const pool = new pg.Pool(config);
 
-passport.use(
-  'local-login',
-  new LocalStrategy({
-    usernameField: 'username',
-    passwordField: 'pwd',
-    passReqToCallback: true
-  },
-  function(req, username, password, done) {
-    pool.connect(function(err, client, doneSql) {
-      if(err) {
-        return done(err);
-      }
-      client.query('SELECT * FROM public.users WHERE username = $1', [username], function(err, result) {
-        doneSql();
-        if(err) {
-          return done(err);
-        }
-        if(!result.rows.length) {
-          return done(null, false, {message: 'Wrong username/password! Try again!'});
-        }
-        Promise.try(function() {
-          return bcrypt.compareAsync(password, result.rows[0].password).catch(addBcryptType);
-        }).then(function(valid) {
-          if(valid) {
-            return done(null, result.rows[0]);
-          } else {
-            return done(null, false, {message: 'Wrong username/password! Try again!'});
-          }
-        });
-      });
-    });
-  })
-);
+function setupAuth() {
+  app.use(bodyParser.urlencoded({ extended: true }));
+  app.use(session({ secret: secret, resave: false, saveUninitialized: false }));
+  const auth = new Authentication(pool, passport);
+  passport.use(new LocalStrategy(auth.authenticate));
+  app.use(passport.initialize());
+  app.use(passport.session());
+}
+
+setupAuth();
+
 
 app.use(express.static(__dirname + '/../public/'));
 app.get('/api/image/newest', function(req, res) {
@@ -201,36 +189,18 @@ app.get('/api/categories', function(req, res) {
     });
   });
 });
-const placeholderLoginForm = '<html><body><form action="/api/login" method="post">' +
-'<p><input type="text" name="username" placeholder="Username" /></p>' +
-'<p><input type="password" name="pwd" placeholder="Password" /></p><p><input type="submit" /></form></body></html>';
-app.get('/api/login', function(req, res) {
-  res.send(placeholderLoginForm);
+app.post('/api/login', passport.authenticate('local', {
+  successReturnToOrRedirect: '/',
+  failureRedirect: '/login-failed'
+}));
+
+app.get('/api/user', function(req, res) {
+  res.send({logged: req.user !== undefined, username: req.user ? req.user.username : null});
 });
-app.post('/api/login', function(req, res, next) {
-  passport.authenticate('local-login', function(err, user, info) {
-    if(err) {
-      return next(err);
-    }
-    if(!user) {
-      return res.json({success: false, error: 'Wrong username/password!'});
-    }
-    req.logIn(user, function(err) {
-      if(err) {
-        return next(err);
-      }
-      return res.redirect('/');
-    });
-  })(req, res, next);
-});
-const registerForm = '<html><body><form action="/api/register" method="post"><input type="text" name="username" placeholder="username" />' +
-'<input type="password" name="password" placeholder="Password" /><input type="submit" /></form></body></html>';
-app.get('/api/register', function(req, res) {
-  res.send(registerForm);
-});
+
 app.post('/api/register', function(req, res) {
   Promise.try(function() {
-    return bcrypt.hashAsync(req.body.password, 19).catch(addBcryptType);
+    return bcrypt.hashAsync(req.body.password, 2).catch(addBcryptType);
   }).then(function(hash) {
     pool.connect(function(err, client, done) {
       if(err) {
@@ -254,7 +224,25 @@ app.post('/api/register', function(req, res) {
     });
   });
 });
-app.post('/api/upload', upload.single('image'), function(req, res) {
+
+// restricted endpoints below
+
+const restricted = () => ensureLogin.ensureLoggedIn(serverConfig.login);
+
+app.post('/api/logout', restricted(), function(req, res) {
+  req.session.destroy(function(err) {
+    if (err) {
+      res.send('Error when logging out.');
+      return;
+    }
+    res.redirect('/');
+  });
+});
+
+app.get('/profile', restricted(), function(req, res) {
+  res.send('yay, logged in!');
+});
+app.post('/api/upload', restricted(), upload.single('image'), function(req, res) {
   pool.connect(function(err, client, done) {
     if(err) {
       res.status(500).json({success: false, error: err});
@@ -285,7 +273,7 @@ app.post('/api/upload', upload.single('image'), function(req, res) {
 const content = '<html><body><form method="post" enctype="multipart/form-data" action="/api/upload"> ' +
   '<p><input type="text" name="name" placeholder="Name" /></p><p><input type="file" name="image" /></p>' +
   '<p><input type="submit" /></body></html>';
-app.get('/api/upload', function(req, res) {
+app.get('/api/upload', restricted(), function(req, res) {
   res.send(content);
 });
 
