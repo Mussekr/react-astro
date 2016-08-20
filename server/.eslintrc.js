@@ -13,6 +13,7 @@ module.exports = {
     },
     "rules": {
       "no-console": "off",
-      "semi": "error"
+      "semi": "error",
+      "strict": "off"
     }
 };

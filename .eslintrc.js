@@ -63,7 +63,7 @@ module.exports = {
         "consistent-this": "error",
         "curly": "error",
         "default-case": "error",
-        "dot-location": "error",
+        "dot-location": ["error", "property"],
         "dot-notation": [
             "error",
             {
@@ -77,10 +77,7 @@ module.exports = {
             "error",
             "never"
         ],
-        "func-style": [
-            "error",
-            "declaration"
-        ],
+        "func-style": "off",
         "generator-star-spacing": "error",
         "global-require": "error",
         "guard-for-in": "error",
@@ -182,7 +179,7 @@ module.exports = {
         "no-throw-literal": "error",
         "no-trailing-spaces": "error",
         "no-undef-init": "error",
-        "no-undefined": "error",
+        "no-undefined": "off",
         "no-underscore-dangle": "error",
         "no-unmodified-loop-condition": "error",
         "no-unneeded-ternary": "error",
@@ -197,7 +194,7 @@ module.exports = {
         "no-useless-rename": "error",
         "no-var": "error",
         "no-void": "error",
-        "no-warning-comments": "error",
+        "no-warning-comments": "off",
         "no-whitespace-before-property": "error",
         "no-with": "error",
         "object-curly-newline": "off",
