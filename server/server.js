@@ -191,7 +191,7 @@ app.get('/api/categories', function(req, res) {
 });
 app.post('/api/login', passport.authenticate('local', {
   successReturnToOrRedirect: '/',
-  failureRedirect: '/login-failed'
+  failureRedirect: '/login-failed.html'
 }));
 
 app.get('/api/user', function(req, res) {
