@@ -13,7 +13,8 @@ const {
   Grid,
   Row,
   Col,
-  Collapse
+  Collapse,
+  Image
 } = require('react-bootstrap');
 const LoginForm = require('./login/LoginForm');
 
