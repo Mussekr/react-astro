@@ -5,64 +5,36 @@ const invalidAuthMessage = 'Incorrect username or password.';
 
 
 function Authentication(db, passport) {
-  passport.serializeUser((user, cb) => {
-    cb(null, user.id);
-  });
-
-  passport.deserializeUser((id, cb) => {
-    db.connect(function(err, client, dbDone) {
-      if (err) {
-        return cb(err);
-      }
-
-      return client.query('SELECT * FROM public.users WHERE id = $1', [id], function(err, result) {
-        dbDone();
-        if (err) {
-          return cb(err);
-        }
-
-        if (result.rows.length > 0) {
-          return cb(null, result.rows[0]);
-        } else {
-          return cb(err);
-        }
-      });
+    passport.serializeUser((user, cb) => {
+        cb(null, user.username);
     });
-  });
 
-  this.authenticate = function(username, password, authDone) {
-    console.log('auth');
-    db.connect(function(err, client, dbDone) {
-      if (err) {
-        return authDone(err);
-      }
+    passport.deserializeUser((username, cb) =>
+        db.oneOrNone('SELECT * FROM public.users WHERE username = $1', username)
+            .then(data => cb(null, data))
+            .catch(err => cb(err))
+    );
 
-      return client.query('SELECT * FROM public.users WHERE username = $1', [username], function(err, result) {
-        dbDone();
-        if (err) {
-          return authDone(err);
-        }
+    this.authenticate = function(username, password, cb) {
+        return db.oneOrNone('SELECT * FROM public.users WHERE username = $1', username)
+            .then(user => {
+                if (user) {
+                    return bcrypt.compare(password, user.password, function(err, res) {
+                        if (err) {
+                            return cb(err);
+                        }
 
-        console.log('found', result.rows);
-
-        if (result.rows.length > 0) {
-          return bcrypt.compare(password, result.rows[0].password, function(err, res) {
-            if (err) {
-              return authDone(err);
-            }
-
-            if (res === true) {
-              return authDone(null, result.rows[0]);
-            } else {
-              return authDone(null, false, { message: invalidAuthMessage });
-            }
-          });
-        } else {
-          return authDone(null, false, { message: invalidAuthMessage});
-        }
-      });
-    });
-  };
+                        if (res === true) {
+                            return cb(null, user);
+                        } else {
+                            return cb(null, false, { message: invalidAuthMessage });
+                        }
+                    });
+                } else {
+                    return cb(null, false, { message: invalidAuthMessage});
+                }
+            }).catch(err => cb(err));
+    };
 
 }
 

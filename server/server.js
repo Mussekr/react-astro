@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const pg = require('pg');
+const pgp = require('pg-promise')();
 const multer = require('multer');
 const Jimp = require('jimp');
 const storage = multer.memoryStorage();
@@ -13,9 +13,10 @@ const bcrypt = Promise.promisifyAll(require('bcrypt'));
 const Authentication = require('./Authentication');
 const ensureLogin = require('connect-ensure-login');
 const bodyParser = require('body-parser');
-const session = require('express-session');
+const cookieSession = require('cookie-session');
 const serverConfig = require('./config.json');
 
+const env = process.env.NODE_ENV || 'development';
 const secret = process.env.NODE_ENV === 'production' ? process.env.APP_SECRET : 'dev-secret';
 if (!secret) {
     throw new Error('Unable to start in production mode with no APP_SECRET set!');
@@ -33,17 +34,34 @@ function addBcryptType(err) {
     err.type = 'bcryptError';
     throw err;
 }
-const config = {
-    max: 20, // max number of clients in the pool
-    idleTimeoutMillis: 30000, // how long a client is allowed to remain idle before being closed
+
+const forceSsl = function (req, res, next) {
+    if (req.headers['x-forwarded-proto'] !== 'https') {
+        return res.redirect(['https://', req.get('Host'), req.url].join(''));
+    }
+    return next();
+};
+
+if (env === 'production') {
+    app.use(forceSsl);
+}
+
+const configPgp = {
+    poolSize: 20, // max number of clients in the pool
     host: process.env.PGHOST || 'localhost'
 };
-const pool = new pg.Pool(config);
+const db = pgp(configPgp);
 
 function setupAuth() {
     app.use(bodyParser.urlencoded({ extended: true }));
-    app.use(session({ secret: secret, resave: false, saveUninitialized: false }));
-    const auth = new Authentication(pool, passport);
+    app.use(cookieSession({
+        secret: secret,
+        resave: false,
+        saveUninitialized: false,
+        httpOnly: true,
+        secureProxy: env === 'production'
+    }));
+    const auth = new Authentication(db, passport);
     passport.use(new LocalStrategy(auth.authenticate));
     app.use(passport.initialize());
     app.use(passport.session());
@@ -54,25 +72,10 @@ setupAuth();
 
 app.use(express.static(__dirname + '/../public/'));
 app.get('/api/image/newest', function(req, res) {
-    pool.connect(function(err, client, done) {
-        if(err) {
-            res.status(500).json({success: false, error: err});
-            return;
-        }
-        client.query('SELECT images.id, images.name, images.created, users.username FROM images' +
-        ' INNER JOIN users ON images.userid=users.id ORDER BY images.created DESC LIMIT 5;', function (err, result) {
-            done();
-            if(err) {
-                res.status(500).json({success: false, error: err});
-            }
-            if(result.rows.length > 0) {
-                res.json(result.rows);
-            } else {
-                res.json({});
-                return;
-            }
-        });
-    });
+    db.any('SELECT images.id, images.name, images.created, users.username FROM images' +
+        ' INNER JOIN users ON images.userid=users.id ORDER BY images.created DESC LIMIT 5;')
+        .then(data => res.send(data))
+        .catch(err => res.send({success: false, error: err}));
 });
 app.get('/api/generatehash/:password', function(req, res) {
     Promise.try(function() {
@@ -95,33 +98,18 @@ app.get('/api/testpassword/:password/:hash', function(req, res) {
     });
 });
 app.get('/api/image/:id', function(req, res) {
-    pool.connect(function(err, client, done) {
-        if(err) {
-            res.status(500).json({success: false, error: err});
-            return;
-        }
-        client.query('SELECT image, mimetype FROM public.images WHERE id = $1', [req.params.id], function (err, result) {
-            done();
-            if(err) {
-                res.status(500).json({success: false, error: err});
-                return;
-            }
-
-            if(result.rows.length > 0) {
-                const img = new Buffer(result.rows[0].image, 'binary');
-                res.writeHead(200, {
-                    'Content-Type': result.rows[0].mimetype,
-                    'Content-Length': img.length
-                });
-                res.end(img);
-            } else {
-                res.status(404).json({success: false, error: 'image not found!'});
-                return;
-            }
+    db.oneOrNone('SELECT image, mimetype FROM public.images WHERE id = $1', [req.params.id])
+    .then(data => {
+        const img = new Buffer(data.image, 'binary');
+        res.writeHead(200, {
+            'Content-Type': data.mimetype,
+            'Content-Length': img.length
         });
-    });
+        res.end(img);
+    }).catch(err => res.status(404).json({success: false, error: err}));
 });
 
+/* REWRITE AFTER IMAGE PAGE READY (gear etc)
 app.get('/api/image/:id/details', function(req, res) {
     pool.connect(function(err, client, done) {
         if(err) {
@@ -142,51 +130,29 @@ app.get('/api/image/:id/details', function(req, res) {
             }
         });
     });
-});
+});*/
 app.get('/api/image/:id/thumbnail', function(req, res) {
-    pool.connect(function(err, client, done) {
-        if(err) {
-            res.status(500).json({success: false, error: err});
-            return;
-        }
-        client.query('SELECT thumbnail, mimetype FROM public.images WHERE id = $1', [req.params.id], function(err, result) {
-            done();
-            if(err) {
-                res.status(500).json({success: false, error: err});
-                return;
-            }
-            if(result.rows.length > 0) {
-                const img = new Buffer(result.rows[0].thumbnail, 'binary');
-                res.writeHead(200, {
-                    'Content-Type': result.rows[0].mimetype,
-                    'Content-Length': img.length
-                });
-                res.end(img);
-            } else {
-                res.status(404).json({success: false, error: 'image not found!'});
-            }
+    db.oneOrNone('SELECT thumbnail, mimetype FROM public.images WHERE id = $1', [req.params.id])
+    .then(data => {
+        console.log(data);
+        const img = new Buffer(data.thumbnail, 'binary');
+        res.writeHead(200, {
+            'Content-Type': data.mimetype,
+            'Content-Length': img.length
         });
-    });
+        res.end(img);
+    }).catch(err => res.status(404).json({success: false, error: err}));
 });
 app.get('/api/categories', function(req, res) {
-    pool.connect(function(err, client, done) {
-        if(err) {
-            res.status(500).json({success: false, error: err});
-            return;
-        }
-        client.query('SELECT * FROM categories', function(err, result) {
-            done();
-            if(err) {
-                res.status(500).json({success: false, error: err});
-                return;
-            }
-            if(result.rows.length > 0) {
-                res.json(result.rows);
-            } else {
-                res.json({});
-            }
-        });
-    });
+    db.any('SELECT * FROM categories')
+    .then(data => res.send(data))
+    .catch(err => res.status(500).send({success: false, error: err}));
+});
+app.get('/api/categories/images/:id', function(req, res) {
+    db.any('SELECT images.id, images.name, images.created, users.username FROM image_detail INNER JOIN images ON image_detail.image_id=images.id ' +
+    'INNER JOIN users ON images.userid=users.id WHERE category_id = $1', [req.params.id])
+    .then(data => res.send(data)
+    ).catch(err => res.status(500).send({success: false, error: err}));
 });
 app.post('/api/login', passport.authenticate('local', {
     successReturnToOrRedirect: '/',
@@ -201,26 +167,9 @@ app.post('/api/register', function(req, res) {
     Promise.try(function() {
         return bcrypt.hashAsync(req.body.password, 2).catch(addBcryptType);
     }).then(function(hash) {
-        pool.connect(function(err, client, done) {
-            if(err) {
-                res.status(500).json({success: false, error: err});
-                return;
-            }
-            client.query('INSERT INTO users (username, password, role) VALUES ($1, $2, $3)', [req.body.username, hash, 0], function(err, result) {
-                done();
-                if(err) {
-                    res.status(500).json({success: false, error: err});
-                    return;
-                }
-                if(result.rowCount > 0) {
-                    res.json({success: true});
-                    return;
-                } else {
-                    res.json({success: false});
-                    return;
-                }
-            });
-        });
+        db.none('INSERT INTO users (username, password, role) VALUES ($1, $2, $3)', [req.body.username, hash, 'user'])
+        .then(() => res.send({success: true}))
+        .catch(err => res.status(500).send({success: false, error: err}));
     });
 });
 
@@ -242,29 +191,11 @@ app.get('/profile', restricted(), function(req, res) {
     res.send('yay, logged in!');
 });
 app.post('/api/upload', restricted(), upload.single('image'), function(req, res) {
-    pool.connect(function(err, client, done) {
-        if(err) {
-            res.status(500).json({success: false, error: err});
-            return;
-        }
-        createThumbnail(req.file.buffer, req.file.mimetype, 200, 200).then(thumbnail => {
-            client.query(
-                'INSERT INTO public.images (name, image, thumbnail, mimetype, created, userid) VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP, $5) RETURNING id',
-                [req.body.name, req.file.buffer, thumbnail, req.file.mimetype, req.user.id], function(err, result) {
-                    done();
-                    if(err) {
-                        res.status(500).json({success: false, error: err});
-                        return;
-                    }
-                    if(result.rowCount > 0) {
-                        res.json({success: true, id: result.rows[0].id});
-                        return;
-                    } else {
-                        res.status(500).json({success: false, error: err});
-                        return;
-                    }
-                });
-        });
+    createThumbnail(req.file.buffer, req.file.mimetype, 200, 200).then(thumbnail => {
+        db.one('INSERT INTO public.images (name, image, thumbnail, mimetype, created, userid) VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP, $5) RETURNING id',
+        [req.body.name, req.file.buffer, thumbnail, req.file.mimetype, req.user.id])
+        .then(data => res.send({success: true, id: data.id}))
+        .catch(err => res.status(500).send({success: false, error: err}));
     });
 });
 
@@ -286,7 +217,3 @@ app.get('*', function(req, res) {
 });
 
 app.listen(process.env.PORT || 8080);
-
-pool.on('error', function (err, client) {
-    console.error('idle client error', err.message, err.stack, client);
-});
