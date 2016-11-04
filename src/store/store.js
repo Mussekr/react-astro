@@ -1,6 +1,6 @@
+import Immutable from 'immutable';
 import { createStore, combineReducers } from 'redux';
 import { routerReducer } from 'react-router-redux';
-import Immutable from 'immutable';
 import { Maybe } from 'monet';
 import Actions from '../constants/actions';
 import { createAction } from '../utils/ActionCreator';
@@ -9,12 +9,13 @@ import api from '../utils/api';
 const initialState = Immutable.Map({
     user: Maybe.None(),
     newestImages: Immutable.List(),
-    categories: Immutable.List()
+    categories: Immutable.List(),
+    categoriesImages: Immutable.List()
 });
 
 /* eslint-disable no-use-before-define */
 
-function reducer(state = initialState, action) {
+export function reducer(state = initialState, action) {
     switch (action.type) {
     case Actions.REQUEST_USER_INFO:
         api.json('/api/user').then(user =>
@@ -37,6 +38,16 @@ function reducer(state = initialState, action) {
         return state;
     case Actions.CATEGORIES_LIST_LOADED:
         return state.set('categories', Immutable.List(action.categories));
+    case Actions.ADD_IMAGE:
+        console.log(action.image);
+        api.postImage(action.image, action.name);
+        return state;
+    case Actions.REQUEST_CATEGORIES_IMAGES_LIST:
+        api.json('/api/categories/images/' + action.id)
+        .then(categoriesImages => store.dispatch(createAction(Actions.CATEGORIES_IMAGES_LIST_LOADED, {categoriesImages})));
+        return state;
+    case Actions.CATEGORIES_IMAGES_LIST_LOADED:
+        return state.set('categoriesImages', Immutable.List(action.categoriesImages));
     default:
         return state;
     }

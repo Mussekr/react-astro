@@ -134,7 +134,6 @@ app.get('/api/image/:id/details', function(req, res) {
 app.get('/api/image/:id/thumbnail', function(req, res) {
     db.oneOrNone('SELECT thumbnail, mimetype FROM public.images WHERE id = $1', [req.params.id])
     .then(data => {
-        console.log(data);
         const img = new Buffer(data.thumbnail, 'binary');
         res.writeHead(200, {
             'Content-Type': data.mimetype,
@@ -178,20 +177,15 @@ app.post('/api/register', function(req, res) {
 const restricted = () => ensureLogin.ensureLoggedIn(serverConfig.login);
 
 app.post('/api/logout', restricted(), function(req, res) {
-    req.session.destroy(function(err) {
-        if (err) {
-            res.send('Error when logging out.');
-            return;
-        }
-        res.redirect('/');
-    });
+    req.session = null;
+    res.redirect('/');
 });
 
 app.get('/profile', restricted(), function(req, res) {
     res.send('yay, logged in!');
 });
 app.post('/api/upload', restricted(), upload.single('image'), function(req, res) {
-    createThumbnail(req.file.buffer, req.file.mimetype, 200, 200).then(thumbnail => {
+    createThumbnail(req.file.buffer, req.file.mimetype, 200, 140).then(thumbnail => {
         db.one('INSERT INTO public.images (name, image, thumbnail, mimetype, created, userid) VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP, $5) RETURNING id',
         [req.body.name, req.file.buffer, thumbnail, req.file.mimetype, req.user.id])
         .then(data => res.send({success: true, id: data.id}))

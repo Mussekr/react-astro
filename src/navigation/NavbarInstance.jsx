@@ -6,7 +6,8 @@ import {
     Nav,
     NavItem,
     NavDropdown,
-    MenuItem
+    MenuItem,
+    Button
 } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
 
@@ -20,6 +21,9 @@ const NavbarInstance = React.createClass({
     },
     printUsername: function() {
         return this.props.user.map(user => user.username).some();
+    },
+    logout: function() {
+        console.log('Logout');
     },
     render: function() {
         return (
@@ -36,7 +40,7 @@ const NavbarInstance = React.createClass({
                         {this.isLoggedIn() ? <LinkContainer to="/upload"><NavItem>Upload</NavItem></LinkContainer> : null}
                     </Nav>
                     <Nav>
-                        {this.isLoggedIn() ? <DropdownMenu user={this.printUsername()} /> : null}
+                        {this.isLoggedIn() ? <DropdownMenu logoutFunc={this.logout} user={this.printUsername()} /> : null}
                     </Nav>
                     <Navbar.Form>
                         <LoginForm user={this.props.user} />
@@ -49,7 +53,8 @@ const NavbarInstance = React.createClass({
 
 const DropdownMenu = React.createClass({
     propTypes: {
-        user: React.PropTypes.string.isRequired
+        user: React.PropTypes.string.isRequired,
+        logoutFunc: React.PropTypes.func
     },
     render: function() {
         return (
@@ -58,7 +63,9 @@ const DropdownMenu = React.createClass({
                 <MenuItem eventKey={3.2}>Another action</MenuItem>
                 <MenuItem eventKey={3.3}>Something else here</MenuItem>
                 <MenuItem divider />
-                <MenuItem eventKey={3.3}>Logout</MenuItem>
+                <MenuItem eventKey={3.3}>
+                    <Button onClick={this.props.logoutFunc} bsSize="small" type="submit">Logout</Button>
+                </MenuItem>
             </NavDropdown>
         );
     }

@@ -44,7 +44,6 @@ $shift-distance: 10px;
     max-width: 100%;
   }
     figcaption {
-      background-color: $figcaption-bg;
       position: absolute;
       padding: 30px;
       @include fill;

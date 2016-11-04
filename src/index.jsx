@@ -9,20 +9,19 @@ import { Router, Route, IndexRoute, browserHistory } from 'react-router';
 import { syncHistoryWithStore } from 'react-router-redux';
 import { createAction } from './utils/ActionCreator';
 import Actions from './constants/actions';
+import store from './store/store';
 import {
   Grid,
   Row,
   Col
 } from 'react-bootstrap';
-import store from './store/store';
 import NewestImages from './images/NewestImages';
 import Categories from './images/Categories';
 import NavbarInstance from './navigation/NavbarInstance';
 import UserPage from './user/UserPage';
 import ImageDetail from './images/ImageDetail';
-
-const mapStateToProps = state => state.main.toJS();
-const mapDispatchToProps = dispatch => ({requestUserInfo: () => dispatch(createAction(Actions.REQUEST_USER_INFO))});
+import CategoryPage from './images/CategoryPage';
+import UploadImageVanilla from './images/UploadImageVanilla';
 
 const GridInstance = React.createClass({
     displayName: 'GridInstance',
@@ -71,6 +70,9 @@ const Home = React.createClass({
     }
 });
 
+const mapStateToProps = state => state.main.toJS();
+const mapDispatchToProps = dispatch => ({requestUserInfo: () => dispatch(createAction(Actions.REQUEST_USER_INFO))});
+
 const App = connect(mapStateToProps, mapDispatchToProps)(GridInstance);
 const history = syncHistoryWithStore(browserHistory, store);
 
@@ -79,8 +81,10 @@ ReactDOM.render(
         <Router history={history}>
             <Route path="/" component={App}>
                 <IndexRoute component={Home} />
-                <Route path="image/:id" component={ImageDetail} />
+                <Route path="image/(:id)" component={ImageDetail} />
                 <Route path="user/:username" component={UserPage} />
+                <Route path="category/(:name)/(:id)" component={CategoryPage} />
+                <Route path="/upload" component={UploadImageVanilla} />
             </Route>
         </Router>
     </Provider>,

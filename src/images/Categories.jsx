@@ -3,6 +3,7 @@ import { createAction } from '../utils/ActionCreator';
 import Actions from '../constants/actions';
 import { connect } from 'react-redux';
 import { Image } from 'react-bootstrap';
+import { Link } from 'react-router';
 
 const Categories = React.createClass({
     displayName: 'Categories',
@@ -39,10 +40,10 @@ const CategoryThumbnail = React.createClass({
     },
     render: function() {
         return (
-            <a href={'/category/' + this.props.link}>
-                <Image src={'/api/image/' + this.props.image + '/thumbnail'} thumbnail responsive />
+            <Link className="category-links" to={'/category/' + this.props.name + '/' + this.props.link}>
+                <Image className="thumbnail-size" src={'/api/image/' + this.props.image + '/thumbnail'} thumbnail responsive />
                 <h3 className="category-margin">{this.props.name}</h3>
-            </a>
+            </Link>
         );
     }
 });

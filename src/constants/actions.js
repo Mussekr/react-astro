@@ -6,5 +6,8 @@ export default keyMirror({
     REQUEST_CATEGORIES_LIST: null,
     CATEGORIES_LIST_LOADED: null,
     REQUEST_USER_INFO: null,
-    USER_CHANGED: null
+    USER_CHANGED: null,
+    ADD_IMAGE: null,
+    REQUEST_CATEGORIES_IMAGES_LIST: null,
+    CATEGORIES_IMAGES_LIST_LOADED: null
 });

@@ -22,7 +22,6 @@ const LoginForm = React.createClass({
     },
     render: function() {
         const logged = this.props.user.map(user => user.logged).orSome(false);
-        console.log(this.props.user.map(user => user.logged));
         if (logged === null) {
             return <div className="user">Loading</div>;
         } else if (logged === true) {
