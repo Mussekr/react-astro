@@ -159,7 +159,11 @@ app.post('/api/login', passport.authenticate('local', {
 }));
 
 app.get('/api/user', function(req, res) {
-    res.send({logged: req.user !== undefined, username: req.user ? req.user.username : null});
+    res.send({
+        logged: req.user !== undefined,
+        username: req.user ? req.user.username : null,
+        role: req.user ? req.user.role : null
+    });
 });
 
 app.post('/api/register', function(req, res) {
