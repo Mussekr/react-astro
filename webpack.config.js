@@ -35,6 +35,7 @@ module.exports = {
     resolve: {
         extensions: ['', '.js', '.jsx', '.scss']
     },
+    devtool: 'source-map',
     plugins: [
         new ExtractTextPlugin('style.css', {
             allChunks: true
