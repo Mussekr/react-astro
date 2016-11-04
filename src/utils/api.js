@@ -16,7 +16,7 @@ const json = (...args) => request(...args)
     })
     .catch(err => typeof err.json === 'function' ? err.json().then(val => Promise.reject(val)) : err);
 
-const post   = (url, body, opts = {}, ...rest) =>
+const post = (url, body, opts = {}, ...rest) =>
     json(url, Object.assign({}, opts, {
         method: 'POST',
         body: JSON.stringify(body),
@@ -26,15 +26,13 @@ const post   = (url, body, opts = {}, ...rest) =>
     }), ...rest);
 
 const postImage = (blob, name, opts = {}) => {
-    fetch('/api/upload', {
+    const data = new FormData();
+    data.append('image', blob);
+    data.append('name', name);
+    return request('/api/upload', {
         method: 'POST',
-        headers: Object.assign({
-            'Content-Type': 'multipart/form-data'
-        }, opts.headers),
-        body: {
-            image: blob,
-            name: name
-        }
+        headers: Object.assign({}, opts.headers),
+        body: data
     })
     .then(text => {
         try {

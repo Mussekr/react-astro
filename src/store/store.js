@@ -1,10 +1,11 @@
 import Immutable from 'immutable';
-import { createStore, combineReducers } from 'redux';
-import { routerReducer } from 'react-router-redux';
+import { createStore, combineReducers, applyMiddleware, compose } from 'redux';
+import { routerReducer, routerMiddleware, push } from 'react-router-redux';
 import { Maybe } from 'monet';
 import Actions from '../constants/actions';
 import { createAction } from '../utils/ActionCreator';
 import api from '../utils/api';
+import { browserHistory } from 'react-router';
 
 const initialState = Immutable.Map({
     user: Maybe.None(),
@@ -39,8 +40,8 @@ export function reducer(state = initialState, action) {
     case Actions.CATEGORIES_LIST_LOADED:
         return state.set('categories', Immutable.List(action.categories));
     case Actions.ADD_IMAGE:
-        console.log(action.image);
-        api.postImage(action.image, action.name);
+        api.postImage(action.image, action.name)
+        .then(id => store.dispatch(push('/upload/' + id.id)));
         return state;
     case Actions.REQUEST_CATEGORIES_IMAGES_LIST:
         api.json('/api/categories/images/' + action.id)
@@ -59,8 +60,15 @@ const reducers = combineReducers({
     main: reducer,
     routing: routerReducer
 });
+const middleware = routerMiddleware(browserHistory);
 
-const store = createStore(reducers, window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__());
+/*eslint-disable no-underscore-dangle*/
+const store = createStore(
+    reducers,
+    compose(applyMiddleware(middleware), window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__())
+);
+
+/*eslint-enable no-underscore-dangle*/
 
 export default store;
 
