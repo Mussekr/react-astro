@@ -1,3 +1,4 @@
+'use strict';
 const express = require('express');
 const app = express();
 const pgp = require('pg-promise')();
@@ -30,6 +31,7 @@ function createThumbnail(image, mime, maxWidth, maxHeight) {
         });
     });
 }
+
 function addBcryptType(err) {
     err.type = 'bcryptError';
     throw err;
@@ -69,7 +71,7 @@ function setupAuth() {
 
 setupAuth();
 
-
+app.use(bodyParser.json());
 app.use(express.static(__dirname + '/../public/'));
 app.get('/api/image/newest', function(req, res) {
     db.any('SELECT images.id, images.name, images.created, users.username FROM images' +
@@ -147,12 +149,31 @@ app.get('/api/categories', function(req, res) {
     .then(data => res.send(data))
     .catch(err => res.status(500).send({success: false, error: err}));
 });
-app.get('/api/categories/images/:id', function(req, res) {
-    db.any('SELECT images.id, images.name, images.created, users.username FROM image_detail INNER JOIN images ON image_detail.image_id=images.id ' +
-    'INNER JOIN users ON images.userid=users.id WHERE category_id = $1', [req.params.id])
-    .then(data => res.send(data)
-    ).catch(err => res.status(500).send({success: false, error: err}));
+app.get('/api/categories/images/:name', function(req, res) {
+    db.one('SELECT id FROM categories WHERE name = $1', [req.params.name])
+    .then(name => {
+        db.any('SELECT images.id, images.name, images.created, users.username FROM image_detail INNER JOIN images ON image_detail.image_id=images.id ' +
+        'INNER JOIN users ON images.userid=users.id WHERE category_id = $1', [name.id])
+        .then(data => res.send(data)
+        ).catch(err => res.status(500).send({success: false, error: err}));
+    }).catch(err => res.status(500).send({success: false, error: err}));
 });
+
+app.get('/api/image/user/:username', function(req, res) {
+    db.one('SELECT COUNT(id) FROM users WHERE username = $1', [req.params.username])
+        .then(data => {
+            if(data.count === '1') {
+                db.manyOrNone('SELECT images.id, images.name, images.created, users.username FROM users' +
+                    ' INNER JOIN images ON users.id=images.userid WHERE users.username = $1 ORDER BY images.created DESC;', [req.params.username])
+                .then(images => res.send(images))
+                .catch(err => res.status(500).send({success: false, error: err}));
+            } else {
+                res.send({success: false, error: 'User not found!'});
+            }
+        })
+        .catch(err => res.status(500).send({success: false, error: err}));
+});
+
 app.post('/api/login', passport.authenticate('local', {
     successReturnToOrRedirect: '/',
     failureRedirect: '/login-failed.html'
@@ -161,18 +182,27 @@ app.post('/api/login', passport.authenticate('local', {
 app.get('/api/user', function(req, res) {
     res.send({
         logged: req.user !== undefined,
+        id: req.user ? req.user.id : null,
         username: req.user ? req.user.username : null,
         role: req.user ? req.user.role : null
     });
 });
 
 app.post('/api/register', function(req, res) {
-    Promise.try(function() {
-        return bcrypt.hashAsync(req.body.password, 2).catch(addBcryptType);
-    }).then(function(hash) {
-        db.none('INSERT INTO users (username, password, role) VALUES ($1, $2, $3)', [req.body.username, hash, 'user'])
-        .then(() => res.send({success: true}))
-        .catch(err => res.status(500).send({success: false, error: err}));
+    db.one('SELECT count(username) FROM users WHERE username = $1', [req.body.username])
+    .then(result => {
+        if(result.count === '0') {
+            console.log(result.count);
+            Promise.try(function() {
+                return bcrypt.hashAsync(req.body.password, 2).catch(addBcryptType);
+            }).then(function(hash) {
+                db.none('INSERT INTO users (username, password, role) VALUES ($1, $2, $3)', [req.body.username, hash, 'user'])
+                .then(() => res.send({success: true}))
+                .catch(err => res.status(500).send({success: false, error: err}));
+            });
+        } else {
+            res.status(400).send({success: false, error: 'Username already exist! Choose another!'});
+        }
     });
 });
 
@@ -196,13 +226,37 @@ app.post('/api/upload', restricted(), upload.single('image'), function(req, res)
         .catch(err => res.status(500).send({success: false, error: err}));
     });
 });
+app.post('/api/gear', restricted(), function(req, res) {
+    db.none('INSERT INTO gear (userid, gear_id, name) VALUES ($1, $2, $3)', [req.user.id, req.body.gearId, req.body.name])
+    .then(() => res.send({success: true}))
+    .catch(err => res.status(500).send({success: false, error: err}));
+});
+app.get('/api/gear', restricted(), function(req, res) {
+    db.manyOrNone('SELECT id, gear_id, name FROM gear WHERE userid = $1 ORDER BY gear_id', [req.user.id])
+    .then(data => {
+        res.send(data);
+    })
+    .catch(err => res.status(500).send({success: false, error: err}));
+});
+// admin endpoints below
+const adminOnly = (req, res, next) => {
+    if(req.user && req.user.role === 'admin') {
+        return next();
+    } else {
+        return res.status(403).send({sucess: false, error: 'Insufficient privileges'});
+    }
+};
 
-//placeholder form
-const content = '<html><body><form method="post" enctype="multipart/form-data" action="/api/upload"> ' +
-  '<p><input type="text" name="name" placeholder="Name" /></p><p><input type="file" name="image" /></p>' +
-  '<p><input type="submit" /></body></html>';
-app.get('/api/upload', restricted(), function(req, res) {
-    res.send(content);
+app.post('/api/category', restricted(), adminOnly, function(req, res) {
+    db.none('INSERT INTO categories (name, image) VALUES ($1, $2)', [req.body.name, req.body.image])
+    .then(() => res.send({sucess: true}))
+    .catch(err => res.status(500).send({success: false, error: err}));
+});
+
+app.get('/api/users', restricted(), adminOnly, function (req, res) {
+    db.any('SELECT id, username, role FROM users ORDER BY id DESC')
+    .then(data => res.send(data))
+    .catch(err => res.status(500).send({success: false, error: err}));
 });
 
 app.get('/api/*', function(req, res) {

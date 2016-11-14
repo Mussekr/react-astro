@@ -5,7 +5,7 @@ import { createAction } from '../utils/ActionCreator';
 import { Maybe } from '../utils/PropTypes';
 import { FormGroup, ControlLabel, FormControl, Button, Alert } from 'react-bootstrap';
 
-const mapStateToProps = state => state.main.toJS();
+const mapStateToProps = state => state.users.toJS();
 const mapDispatchToProps = dispatch => ({
     requestUserInfo: () => dispatch(createAction(Actions.REQUEST_USER_INFO)),
     onAdd: (image, name) => dispatch(createAction(Actions.ADD_IMAGE, {

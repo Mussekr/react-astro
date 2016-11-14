@@ -34,6 +34,7 @@ const postImage = (blob, name, opts = {}) => {
         headers: Object.assign({}, opts.headers),
         body: data
     })
+    .then(resp => resp.text())
     .then(text => {
         try {
             return JSON.parse(text);

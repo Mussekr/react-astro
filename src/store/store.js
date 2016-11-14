@@ -1,34 +1,26 @@
 import Immutable from 'immutable';
 import { createStore, combineReducers, applyMiddleware, compose } from 'redux';
 import { routerReducer, routerMiddleware, push } from 'react-router-redux';
-import { Maybe } from 'monet';
 import Actions from '../constants/actions';
 import { createAction } from '../utils/ActionCreator';
 import api from '../utils/api';
 import { browserHistory } from 'react-router';
+import { reducer as UserReducer } from './Users';
+import createSagaMiddleware from 'redux-saga';
+import mySaga from './sagas';
 
 const initialState = Immutable.Map({
-    user: Maybe.None(),
     newestImages: Immutable.List(),
     categories: Immutable.List(),
-    categoriesImages: Immutable.List()
+    categoriesImages: Immutable.List(),
+    gearList: Immutable.List(),
+    userImages: Immutable.List()
 });
 
 /* eslint-disable no-use-before-define */
 
 export function reducer(state = initialState, action) {
     switch (action.type) {
-    case Actions.REQUEST_USER_INFO:
-        api.json('/api/user').then(user =>
-            store.dispatch(createAction(Actions.USER_CHANGED, {user: user.logged ? user : null}))
-        );
-        return state;
-    case Actions.USER_CHANGED:
-        if(action.user) {
-            return state.set('user', Maybe.Some(action.user));
-        } else {
-            return state.set('user', Maybe.None());
-        }
     case Actions.REQUEST_NEWEST_IMAGES_LIST:
         api.json('/api/image/newest').then(newestImages => store.dispatch(createAction(Actions.NEWEST_IMAGES_LIST_LOADED, {newestImages})));
         return state;
@@ -49,6 +41,17 @@ export function reducer(state = initialState, action) {
         return state;
     case Actions.CATEGORIES_IMAGES_LIST_LOADED:
         return state.set('categoriesImages', Immutable.List(action.categoriesImages));
+    case Actions.REQUEST_GEAR_LIST:
+        api.json('/api/gear').then(gear => store.dispatch(createAction(Actions.GEAR_LIST, {gear})));
+        return state;
+    case Actions.GEAR_LIST:
+        return state.set('gearList', Immutable.List(action.gear));
+    case Actions.REQUEST_USER_IMAGES_LIST:
+        api.json('/api/image/user/' + action.username)
+        .then(images => store.dispatch(createAction(Actions.USER_IMAGES_LIST_LOADED, {images})));
+        return state;
+    case Actions.USER_IMAGES_LIST_LOADED:
+        return state.set('userImages', Immutable.List(action.images));
     default:
         return state;
     }
@@ -58,17 +61,21 @@ export function reducer(state = initialState, action) {
 
 const reducers = combineReducers({
     main: reducer,
-    routing: routerReducer
+    routing: routerReducer,
+    users: UserReducer
 });
 const middleware = routerMiddleware(browserHistory);
+const sagaMiddleware = createSagaMiddleware();
 
 /*eslint-disable no-underscore-dangle*/
 const store = createStore(
     reducers,
-    compose(applyMiddleware(middleware), window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__())
+    compose(applyMiddleware(middleware), applyMiddleware(sagaMiddleware), window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__())
 );
 
 /*eslint-enable no-underscore-dangle*/
+
+sagaMiddleware.run(mySaga);
 
 export default store;
 

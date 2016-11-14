@@ -25,13 +25,7 @@ const LoginForm = React.createClass({
         if (logged === null) {
             return <div className="user">Loading</div>;
         } else if (logged === true) {
-            return (
-                <div className="user">
-                    <Form inline action="/api/logout" method="post">
-                        <Button bsSize="small" type="submit">Logout</Button>
-                    </Form>
-                </div>
-            );
+            return null;
         } else {
             return (
                 <Form className="login" inline action="/api/login" method="post">

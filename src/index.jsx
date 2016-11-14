@@ -20,15 +20,21 @@ import Categories from './images/Categories';
 import NavbarInstance from './navigation/NavbarInstance';
 import UserPage from './user/UserPage';
 import ImageDetail from './images/ImageDetail';
+import ImageFull from './images/ImageFull';
 import CategoryPage from './images/CategoryPage';
 import UploadImageVanilla from './images/UploadImageVanilla';
+import UploadImageDetails from './images/UploadImageDetails';
+import Register from './user/Register';
+import Gear from './user/Gear';
+import AdminCategories from './admin/AdminCategories';
 
 const GridInstance = React.createClass({
     displayName: 'GridInstance',
     propTypes: {
         user: React.PropTypes.object.isRequired,
         requestUserInfo: React.PropTypes.func.isRequired,
-        children: React.PropTypes.element.isRequired
+        children: React.PropTypes.element.isRequired,
+        logout: React.PropTypes.func.isRequired
     },
     componentDidMount: function() {
         this.props.requestUserInfo();
@@ -38,7 +44,7 @@ const GridInstance = React.createClass({
             <Grid>
                 <Row>
                     <Col xs={0} md={0}></Col>
-                    <Col xs={12} md={12}><NavbarInstance user={this.props.user} /></Col>
+                    <Col xs={12} md={12}><NavbarInstance user={this.props.user} logout={this.props.logout} /></Col>
                     <Col xs={0} md={0}></Col>
                 </Row>
                 <Row>
@@ -70,8 +76,11 @@ const Home = React.createClass({
     }
 });
 
-const mapStateToProps = state => state.main.toJS();
-const mapDispatchToProps = dispatch => ({requestUserInfo: () => dispatch(createAction(Actions.REQUEST_USER_INFO))});
+const mapStateToProps = state => state.users.toJS();
+const mapDispatchToProps = dispatch => ({
+    requestUserInfo: () => dispatch(createAction(Actions.REQUEST_USER_INFO)),
+    logout: () => dispatch(createAction(Actions.LOGOUT))
+});
 
 const App = connect(mapStateToProps, mapDispatchToProps)(GridInstance);
 const history = syncHistoryWithStore(browserHistory, store);
@@ -85,7 +94,12 @@ ReactDOM.render(
                 <Route path="user/:username" component={UserPage} />
                 <Route path="category/(:name)/(:id)" component={CategoryPage} />
                 <Route path="/upload" component={UploadImageVanilla} />
+                <Route path="/upload/:id" component={UploadImageDetails} />
+                <Route path="/register" component={Register} />
+                <Route path="/gear" component={Gear} />
+                <Route path="/admin/categories" component={AdminCategories} />
             </Route>
+            <Route path="/image/(:id)/full" component={ImageFull} />
         </Router>
     </Provider>,
     document.getElementById('app')

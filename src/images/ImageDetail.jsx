@@ -1,6 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { Image } from 'react-bootstrap';
+import { Link } from 'react-router';
 
 function mapStateToProps(state, ownProps) {
     return {
@@ -16,7 +17,7 @@ const ImageDetail = React.createClass({
         return (
             <div>
             <div className="flexbox-images">
-                <Image className="image-detail" src={'/api/image/' + this.props.id} rounded responsive />
+                <Link to={'/image/' + this.props.id + '/full'}><Image className="image-detail" src={'/api/image/' + this.props.id} rounded responsive /></Link>
             </div>
             <div className="flexbox-images"><h2>Name of image</h2></div>
             <div className="flexbox-images">

@@ -5,13 +5,8 @@ import { createAction } from '../utils/ActionCreator';
 import ImageThumbnail from './ImageThumbnail';
 import moment from 'moment';
 
-function mapStateToProps(state, ownProps) {
-    return {
-        id: ownProps.params.id,
-        name: ownProps.params.name,
-        main: state.main.toJS()
-    };
-}
+
+const mapStateToProps = (state, ownProps) => Object.assign(state.main.toJS(), {name: ownProps.params.name, id: ownProps.params.id});
 const mapDispatchToProps = dispatch => ({
     requestCategoryImages: id => dispatch(createAction(Actions.REQUEST_CATEGORIES_IMAGES_LIST, {
         id
@@ -23,7 +18,7 @@ const CategoryPage = React.createClass({
         name: React.PropTypes.string.isRequired,
         id: React.PropTypes.string.isRequired,
         requestCategoryImages: React.PropTypes.func.isRequired,
-        main: React.PropTypes.object.isRequired
+        categoriesImages: React.PropTypes.arrayOf(React.PropTypes.object.isRequired).isRequired
     },
     getDefaultProps: function() {
         return {
@@ -31,10 +26,10 @@ const CategoryPage = React.createClass({
         };
     },
     componentDidMount: function() {
-        this.props.requestCategoryImages(this.props.id);
+        this.props.requestCategoryImages(this.props.name);
     },
     render: function() {
-        const data = this.props.main.categoriesImages.map(function(image) {
+        const data = this.props.categoriesImages.map(function(image) {
             return <ImageThumbnail key={image.id} image={image.id} author={image.username} name={image.name} date={moment(image.created).fromNow()} />;
         });
         return (
