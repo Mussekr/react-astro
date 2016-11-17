@@ -52,7 +52,7 @@ const Register = React.createClass({
         }
         return (
             <Form horizontal onSubmit={this.onSubmit}>
-                <FormGroup controlId="formHorizontalUsername" validationState={this.validate('username') ? 'success' : 'error'}>
+                <FormGroup controlId="formHorizontalUsername">
                     <Col componentClass={ControlLabel} sm={2}>
                         Username
                     </Col>

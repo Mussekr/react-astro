@@ -14,7 +14,14 @@ const initialState = Immutable.Map({
     categories: Immutable.List(),
     categoriesImages: Immutable.List(),
     gearList: Immutable.List(),
-    userImages: Immutable.List()
+    userImages: Immutable.List(),
+    imageLoadingIcon: false,
+    telescope: Immutable.List(),
+    mount: Immutable.List(),
+    imagingCamera: Immutable.List(),
+    guideCamera: Immutable.List(),
+    filter: Immutable.List(),
+    misc: Immutable.List()
 });
 
 /* eslint-disable no-use-before-define */
@@ -32,6 +39,7 @@ export function reducer(state = initialState, action) {
     case Actions.CATEGORIES_LIST_LOADED:
         return state.set('categories', Immutable.List(action.categories));
     case Actions.ADD_IMAGE:
+        state.set('imageLoadingIcon', true);
         api.postImage(action.image, action.name)
         .then(id => store.dispatch(push('/upload/' + id.id)));
         return state;
@@ -45,13 +53,21 @@ export function reducer(state = initialState, action) {
         api.json('/api/gear').then(gear => store.dispatch(createAction(Actions.GEAR_LIST, {gear})));
         return state;
     case Actions.GEAR_LIST:
-        return state.set('gearList', Immutable.List(action.gear));
+
+        /*return state.set('gearList', Immutable.List(action.gear));*/
+        action.gear.forEach(gear =>
+            state.set(gear.gear_type, state.get(gear.gear_type).push(gear))
+        );
+        return state;
     case Actions.REQUEST_USER_IMAGES_LIST:
         api.json('/api/image/user/' + action.username)
         .then(images => store.dispatch(createAction(Actions.USER_IMAGES_LIST_LOADED, {images})));
         return state;
     case Actions.USER_IMAGES_LIST_LOADED:
         return state.set('userImages', Immutable.List(action.images));
+    case Actions.NAVIGATE_TO_INDEX:
+        store.dispatch(push('/' + action.message.username));
+        return state;
     default:
         return state;
     }

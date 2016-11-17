@@ -36,7 +36,6 @@ const Gear = React.createClass({
         this.props.loadGear();
     },
     render: function() {
-        console.log(this.props.gearList);
         return (
             <div className="flexbox-images">
                 <Col xs={4} md={4}>

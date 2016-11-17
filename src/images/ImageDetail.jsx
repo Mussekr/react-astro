@@ -2,6 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { Image } from 'react-bootstrap';
 import { Link } from 'react-router';
+import ProgressiveImage from 'react-progressive-image';
 
 function mapStateToProps(state, ownProps) {
     return {
@@ -17,7 +18,11 @@ const ImageDetail = React.createClass({
         return (
             <div>
             <div className="flexbox-images">
-                <Link to={'/image/' + this.props.id + '/full'}><Image className="image-detail" src={'/api/image/' + this.props.id} rounded responsive /></Link>
+                <Link to={'/image/' + this.props.id + '/full'}>
+                    <ProgressiveImage src={'/api/image/' + this.props.id} placeholder="/img/placeholder.jpg">
+                        { src => <Image className="image-detail" src={src} rounded responsive />}
+                    </ProgressiveImage>
+                </Link>
             </div>
             <div className="flexbox-images"><h2>Name of image</h2></div>
             <div className="flexbox-images">

@@ -1,5 +1,6 @@
 import './scss/imagehover.scss';
 import './scss/style.scss';
+import 'font-awesome/css/font-awesome.css';
 import 'whatwg-fetch';
 import 'babel-polyfill';
 import React from 'react';
@@ -22,11 +23,12 @@ import UserPage from './user/UserPage';
 import ImageDetail from './images/ImageDetail';
 import ImageFull from './images/ImageFull';
 import CategoryPage from './images/CategoryPage';
-import UploadImageVanilla from './images/UploadImageVanilla';
+import UploadImage from './images/UploadImage';
 import UploadImageDetails from './images/UploadImageDetails';
 import Register from './user/Register';
 import Gear from './user/Gear';
 import AdminCategories from './admin/AdminCategories';
+import AdminUsers from './admin/AdminUsers';
 
 const GridInstance = React.createClass({
     displayName: 'GridInstance',
@@ -93,11 +95,12 @@ ReactDOM.render(
                 <Route path="image/(:id)" component={ImageDetail} />
                 <Route path="user/:username" component={UserPage} />
                 <Route path="category/(:name)/(:id)" component={CategoryPage} />
-                <Route path="/upload" component={UploadImageVanilla} />
+                <Route path="/upload" component={UploadImage} />
                 <Route path="/upload/:id" component={UploadImageDetails} />
                 <Route path="/register" component={Register} />
                 <Route path="/gear" component={Gear} />
                 <Route path="/admin/categories" component={AdminCategories} />
+                <Route path="/admin/users" component={AdminUsers} />
             </Route>
             <Route path="/image/(:id)/full" component={ImageFull} />
         </Router>

@@ -28,9 +28,34 @@ module.exports = {
             }
         },
         {
+            test: /\.woff(\?v=\d+\.\d+\.\d+)?$/,
+            loader: 'url?limit=10000&mimetype=application/font-woff&name=./webpack-assets/[name]/[hash].[ext]'
+        },
+        {
+            test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/,
+            loader: 'url?limit=10000&mimetype=application/font-woff&name=./webpack-assets/[name]/[hash].[ext]'
+        },
+        {
+            test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
+            loader: 'url?limit=10000&mimetype=application/octet-stream&name=./webpack-assets/[name]/[hash].[ext]'
+        },
+        {
+            test: /\.eot(\?v=\d+\.\d+\.\d+)?$/,
+            loader: 'file?&name=./webpack-assets/[name]/[hash].[ext]'
+        },
+        {
+            test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
+            loader: 'url?limit=10000&mimetype=image/svg+xml&name=./webpack-assets/[name]/[hash].[ext]'
+        },
+        {
             test: /\.scss$/,
             loader: ExtractTextPlugin.extract('css!sass')
-        }]
+        },
+        {
+            test: /\.css$/,
+            loader: ExtractTextPlugin.extract('css')
+        }
+        ]
     },
     resolve: {
         extensions: ['', '.js', '.jsx', '.scss']

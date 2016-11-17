@@ -197,7 +197,7 @@ app.post('/api/register', function(req, res) {
                 return bcrypt.hashAsync(req.body.password, 2).catch(addBcryptType);
             }).then(function(hash) {
                 db.none('INSERT INTO users (username, password, role) VALUES ($1, $2, $3)', [req.body.username, hash, 'user'])
-                .then(() => res.send({success: true}))
+                .then(() => res.send({success: true, username: req.body.username}))
                 .catch(err => res.status(500).send({success: false, error: err}));
             });
         } else {
@@ -227,12 +227,12 @@ app.post('/api/upload', restricted(), upload.single('image'), function(req, res)
     });
 });
 app.post('/api/gear', restricted(), function(req, res) {
-    db.none('INSERT INTO gear (userid, gear_id, name) VALUES ($1, $2, $3)', [req.user.id, req.body.gearId, req.body.name])
+    db.none('INSERT INTO gear (userid, gear_type, name) VALUES ($1, $2, $3)', [req.user.id, req.body.gearId, req.body.name])
     .then(() => res.send({success: true}))
     .catch(err => res.status(500).send({success: false, error: err}));
 });
 app.get('/api/gear', restricted(), function(req, res) {
-    db.manyOrNone('SELECT id, gear_id, name FROM gear WHERE userid = $1 ORDER BY gear_id', [req.user.id])
+    db.manyOrNone('SELECT id, gear_type, name FROM gear WHERE userid = $1 ORDER BY gear_type', [req.user.id])
     .then(data => {
         res.send(data);
     })
@@ -253,10 +253,56 @@ app.post('/api/category', restricted(), adminOnly, function(req, res) {
     .catch(err => res.status(500).send({success: false, error: err}));
 });
 
+app.post('/api/category/change/image', restricted(), adminOnly, function(req, res) {
+    db.oneOrNone('SELECT count(id) FROM categories WHERE name = $1', [req.body.id])
+    .then(result => {
+        if(result.count === '1') {
+            db.none('UPDATE categories SET image = $1 WHERE name = $2', [req.body.image, req.body.id])
+            .then(() => res.send({success: true}))
+            .catch(err => res.status(500).send({success: false, error: err}));
+        } else {
+            res.status(400).send({sucess: false, error: 'Category doesn\'t exist' });
+        }
+    })
+    .catch(err => res.status(500).send({success: false, error: err}));
+});
+
+app.delete('/api/category/:id', restricted(), adminOnly, function(req, res) {
+    db.none('DELETE FROM categories WHERE id = $1', [req.params.id])
+    .then(() => res.send({success: true}))
+    .catch(e => res.status(500).send({success: false, error: e}));
+});
+
+app.get('/api/users', restricted(), adminOnly, function(req, res) {
+    db.any('SELECT id, username, role FROM users ORDER BY id DESC')
+    .then(data => res.send(data))
+    .catch(err => res.status(500).send({sucess: false, error: err}));
+});
+
 app.get('/api/users', restricted(), adminOnly, function (req, res) {
     db.any('SELECT id, username, role FROM users ORDER BY id DESC')
     .then(data => res.send(data))
     .catch(err => res.status(500).send({success: false, error: err}));
+});
+
+app.post('/api/users/promote/', restricted(), adminOnly, function(req, res) {
+    if(req.user.id === req.body.id) {
+        res.status(400).send({sucess: false, error: 'unable to demote self'});
+    } else {
+        db.none('UPDATE users SET role = $1 WHERE id = $2', [req.body.group, req.body.id])
+        .then(() => res.send({sucess: true}))
+        .catch(err => res.status(500).send({success: false, error: err}));
+    }
+});
+
+app.delete('/api/users/:id', restricted(), adminOnly, function(req, res) {
+    if(req.user.id === req.params.id) {
+        res.status(400).send({sucess: false, error: 'Unable to delete self'});
+    } else {
+        db.none('DELETE FROM users WHERE id = $1', [req.params.id])
+        .then(() => res.send({success: true}))
+        .catch(err => res.status(500).send({success: false, error: err}));
+    }
 });
 
 app.get('/api/*', function(req, res) {

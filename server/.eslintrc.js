@@ -14,6 +14,7 @@ module.exports = {
     "rules": {
       "no-console": "off",
       "semi": "error",
-      "strict": "off"
+      "strict": "off",
+      "max-lines": "off"
     }
 };

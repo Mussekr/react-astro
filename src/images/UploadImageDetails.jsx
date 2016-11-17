@@ -4,12 +4,8 @@ import { createAction } from '../utils/ActionCreator';
 import Actions from '../constants/actions';
 import { FormGroup, ControlLabel, FormControl, Image, Col } from 'react-bootstrap';
 
-function mapStateToProps(state, ownProps) {
-    return {
-        id: ownProps.params.id,
-        main: state.main.toJS()
-    };
-}
+
+const mapStateToProps = (state, ownProps) => Object.assign(state.main.toJS(), {id: ownProps.params.id});
 const mapDispatchToProps = dispatch => ({
     loadCategories: () => dispatch(createAction(Actions.REQUEST_CATEGORIES_LIST))
 });
@@ -18,7 +14,7 @@ const UploadImageDetails = React.createClass({
     propTypes: {
         id: React.PropTypes.string.isRequired,
         loadCategories: React.PropTypes.func.isRequired,
-        main: React.PropTypes.object.isRequired
+        categories: React.PropTypes.arrayOf(React.PropTypes.object.isRequired).isRequired
     },
     componentDidMount: function() {
         this.props.loadCategories();
@@ -47,7 +43,7 @@ const UploadImageDetails = React.createClass({
                 <Col xs={4} md={4}>
                     <h1>Fill image details</h1>
                     <div className="flexbox-images"><Image className="thumbnail-size" src={'/api/image/' + this.props.id + '/thumbnail'} responsive /></div>
-                    <CategoryList categories={this.props.main.categories} onChange={ev => this.handleField('category', ev.target.value)} />
+                    <CategoryList categories={this.props.categories} onChange={ev => this.handleField('category', ev.target.value)} />
                     <GearList data={this.state.data} name="Telescope" onChange={ev => this.handleField('telescope', ev.target.value)} />
                 </Col>
             </div>

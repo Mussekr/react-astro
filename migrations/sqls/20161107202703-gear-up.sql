@@ -2,6 +2,6 @@
 CREATE TABLE gear
 (
     userid bigint NOT NULL,
-    gear_id bigint,
+    gear_type text,
     name text
 );
