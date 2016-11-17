@@ -55,9 +55,9 @@ export function reducer(state = initialState, action) {
     case Actions.GEAR_LIST:
 
         /*return state.set('gearList', Immutable.List(action.gear));*/
-        action.gear.forEach(gear =>
-            state.set(gear.gear_type, state.get(gear.gear_type).push(gear))
-        );
+        action.gear.reduce((prevState, gearItem) => {
+            return state.update(gearItem.gear_type, gearTypes => gearTypes.push(gearItem));
+        }, state);
         return state;
     case Actions.REQUEST_USER_IMAGES_LIST:
         api.json('/api/image/user/' + action.username)
