@@ -30,5 +30,16 @@ export default keyMirror({
     DELETE_CATEGORY_FAILURE: null,
     UPDATE_CATEGORY_IMAGE: null,
     ADD_CATEGORY: null,
-    ADD_CATEGORY_FAILED: null
+    ADD_CATEGORY_FAILED: null,
+    DELETE_GEAR: null,
+    DELETE_GEAR_FAILED: null,
+    ADD_GEAR: null,
+    ADD_GEAR_FAILED: null,
+    ADD_IMAGE_GEAR: null,
+    IMAGE_GEAR: null,
+    IMAGE_GEAR_FAILED: null,
+    REQUEST_IMAGE_GEAR: null,
+    REQUEST_IMAGE_DETAILS: null,
+    IMAGE_DETAILS_LIST: null,
+    IMAGE_DETAILS_FAILED: null
 });

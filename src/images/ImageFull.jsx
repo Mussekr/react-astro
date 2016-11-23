@@ -13,8 +13,8 @@ const ImageFull = React.createClass({
         return (
             <div className="flexbox-images image-full">
                 <Link to={'/image/' + this.props.routeParams.id}>
-                    <ProgressiveImage src={'/api/image/' + this.props.routeParams.id} placeholder="/img/placeholder.jpg">
-                        {src => <Image src={src} rounded responsive className="image-full-img" />}
+                    <ProgressiveImage src={'/api/image/' + this.props.routeParams.id} placeholder={'/api/image/' + this.props.routeParams.id + '/blur'}>
+                        {src => <Image src={src} className="image-full-img" responsive rounded />}
                     </ProgressiveImage>
                 </Link>
             </div>

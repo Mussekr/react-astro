@@ -81,8 +81,9 @@ const AdminCategories = React.createClass({
         };
     },
     componentDidMount: function() {
-        this.props.loadCategories();
-        this.props.requestUserInfo();
+        if(this.isAdmin()) {
+            this.props.loadCategories();
+        }
     },
     isAdmin: function() {
         return this.props.user.map(user => user.role === 'admin').orSome(false);

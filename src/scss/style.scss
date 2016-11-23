@@ -28,6 +28,12 @@
     height: 120px;
 }
 .thumbnail-size {
-    height: 130px;
-    width: 200px;
+    height: 130px !important;
+    width: 200px !important;
+}
+.header-row {
+    margin-bottom: 20px;
+}
+.footer {
+    margin-top:20px;
 }

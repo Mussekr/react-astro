@@ -1,6 +1,7 @@
 import './scss/imagehover.scss';
 import './scss/style.scss';
 import 'font-awesome/css/font-awesome.css';
+import './bootstrap/css/bootstrap.css';
 import 'whatwg-fetch';
 import 'babel-polyfill';
 import React from 'react';
@@ -14,7 +15,8 @@ import store from './store/store';
 import {
   Grid,
   Row,
-  Col
+  Col,
+  Image
 } from 'react-bootstrap';
 import NewestImages from './images/NewestImages';
 import Categories from './images/Categories';
@@ -25,6 +27,7 @@ import ImageFull from './images/ImageFull';
 import CategoryPage from './images/CategoryPage';
 import UploadImage from './images/UploadImage';
 import UploadImageDetails from './images/UploadImageDetails';
+import UploadFilters from './images/UploadFilters';
 import Register from './user/Register';
 import Gear from './user/Gear';
 import AdminCategories from './admin/AdminCategories';
@@ -49,10 +52,30 @@ const GridInstance = React.createClass({
                     <Col xs={12} md={12}><NavbarInstance user={this.props.user} logout={this.props.logout} /></Col>
                     <Col xs={0} md={0}></Col>
                 </Row>
+                <Row className="header-row">
+                    <Col xs={0} md={0} />
+                    <Col xs={12} md={12}>
+                        <header>
+                            <Image src="/img/placeholder-header.png" responsive rounded />
+                        </header>
+                    </Col>
+                    <Col xs={0} md={0} />
+                </Row>
                 <Row>
                     <Col xs={0} md={0}></Col>
                     <Col xs={12} md={12}>
                         {this.props.children}
+                    </Col>
+                    <Col xs={0} md={0}></Col>
+                </Row>
+                <Row className="footer">
+                    <Col xs={0} md={0}></Col>
+                    <Col xs={12} md={12}>
+                        <div className="flexbox-images">
+                            <span>
+                                Written by Rasmus Kröger. Code available at <a href="http://github.com/mussekr/react-astro">mussekr/react-astro</a>
+                            </span>
+                        </div>
                     </Col>
                     <Col xs={0} md={0}></Col>
                 </Row>
@@ -97,6 +120,7 @@ ReactDOM.render(
                 <Route path="category/(:name)/(:id)" component={CategoryPage} />
                 <Route path="/upload" component={UploadImage} />
                 <Route path="/upload/:id" component={UploadImageDetails} />
+                <Route path="/upload/filters/:id" component={UploadFilters} />
                 <Route path="/register" component={Register} />
                 <Route path="/gear" component={Gear} />
                 <Route path="/admin/categories" component={AdminCategories} />

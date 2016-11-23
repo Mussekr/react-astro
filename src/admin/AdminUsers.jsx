@@ -33,7 +33,9 @@ const AdminUsers = React.createClass({
         return this.props.user.map(user => user.role === 'admin').orSome(false);
     },
     componentDidMount: function() {
-        this.props.fetchUserList();
+        if(this.isAdmin()) {
+            this.props.fetchUserList();
+        }
     },
     onDelete: function(id) {
         if(confirm('Are you sure?')) {

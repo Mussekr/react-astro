@@ -28,7 +28,7 @@ const NavbarInstance = React.createClass({
     },
     render: function() {
         return (
-            <Navbar inverse>
+            <Navbar>
                 <Navbar.Header>
                     <Navbar.Brand>
                         <a href="/"><b>Astrogallery</b></a>
@@ -43,10 +43,10 @@ const NavbarInstance = React.createClass({
                         {this.isLoggedIn() ? <LinkContainer to="/upload"><NavItem>Upload</NavItem></LinkContainer>
                         : <LinkContainer to="/register"><NavItem>Register</NavItem></LinkContainer>}
                     </Nav>
-                    {this.isAdmin() ? <Nav><AdminDropdownMenu /></Nav> : null}
                     <Nav>
                         {this.isLoggedIn() ? <DropdownMenu logoutFunc={this.props.logout} user={this.printUsername()} /> : null}
                     </Nav>
+                    {this.isAdmin() ? <Nav><AdminDropdownMenu /></Nav> : null}
                     <Navbar.Form>
                         <LoginForm user={this.props.user} />
                     </Navbar.Form>

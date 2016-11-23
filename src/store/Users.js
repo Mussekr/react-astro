@@ -1,6 +1,8 @@
 import Actions from '../constants/actions';
 import Immutable from 'immutable';
 import { Maybe } from 'monet';
+import store from './store';
+import { push } from 'react-router-redux';
 
 const initialState = Immutable.Map({
     user: Maybe.None(),
@@ -24,6 +26,9 @@ export function reducer(state = initialState, action) {
         return state;
     case Actions.REGISTER_FAILED:
         return state.set('registerError', action.message);
+    case Actions.NAVIGATE_TO_INDEX:
+        store.dispatch(push('/'));
+        return state;
     case Actions.USER_LIST_LOADED:
         return state.set('users', action.users);
     default:

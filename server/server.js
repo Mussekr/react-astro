@@ -32,6 +32,15 @@ function createThumbnail(image, mime, maxWidth, maxHeight) {
     });
 }
 
+function createBlurThumbnail(image, mime) {
+    return new Promise(function(resolve, reject) {
+        Jimp.read(image).then(img => {
+            img.blur(4);
+            img.getBuffer(mime, (err, data) => err ? reject(err) : resolve(data));
+        });
+    });
+}
+
 function addBcryptType(err) {
     err.type = 'bcryptError';
     throw err;
@@ -79,26 +88,6 @@ app.get('/api/image/newest', function(req, res) {
         .then(data => res.send(data))
         .catch(err => res.send({success: false, error: err}));
 });
-app.get('/api/generatehash/:password', function(req, res) {
-    Promise.try(function() {
-        return bcrypt.hashAsync(req.params.password, 10).catch(addBcryptType);
-    }).then(function(hash) {
-        res.json({password: req.params.password, hahs: hash});
-    });
-});
-app.get('/api/testpassword/:password/:hash', function(req, res) {
-    Promise.try(function() {
-        return bcrypt.compareAsync(req.params.password, req.params.hash).catch(addBcryptType);
-    }).then(function(valid) {
-        if(valid) {
-            res.json({success: true});
-            return;
-        } else {
-            res.json({success: false});
-            return;
-        }
-    });
-});
 app.get('/api/image/:id', function(req, res) {
     db.oneOrNone('SELECT image, mimetype FROM public.images WHERE id = $1', [req.params.id])
     .then(data => {
@@ -111,28 +100,19 @@ app.get('/api/image/:id', function(req, res) {
     }).catch(err => res.status(404).json({success: false, error: err}));
 });
 
-/* REWRITE AFTER IMAGE PAGE READY (gear etc)
+app.get('/api/image/:id/gear', function(req, res) {
+    db.any('SELECT gear.name, gear.gear_type FROM public.image_gear INNER JOIN public.gear ON image_gear.gear_id=gear.id WHERE image_id = $1', [req.params.id])
+    .then(data => res.send(data))
+    .catch(err => res.status(500).send({sucess: false, error: err}));
+});
+
 app.get('/api/image/:id/details', function(req, res) {
-    pool.connect(function(err, client, done) {
-        if(err) {
-            res.status(500).json({success: false, error: err});
-            return;
-        }
-        client.query('SELECT id,name, mimetype, created FROM public.images WHERE id = $1', [req.params.id], function(err, result) {
-            done();
-            if(err) {
-                res.status(500).json({success: false, error: err});
-                return;
-            }
-            if(result.rows.length > 0) {
-                res.json(result.rows[0]);
-            } else {
-                res.status(404).json({success: false, error: 'Image not found!'});
-                return;
-            }
-        });
-    });
-});*/
+    db.any('SELECT images.created, images.description, images.name, users.username FROM images ' +
+    'INNER JOIN users ON images.userid=users.id WHERE images.id = $1', [req.params.id])
+    .then(data => res.send(data))
+    .catch(err => res.status(500).send({sucess: false, error: err}));
+});
+
 app.get('/api/image/:id/thumbnail', function(req, res) {
     db.oneOrNone('SELECT thumbnail, mimetype FROM public.images WHERE id = $1', [req.params.id])
     .then(data => {
@@ -144,6 +124,19 @@ app.get('/api/image/:id/thumbnail', function(req, res) {
         res.end(img);
     }).catch(err => res.status(404).json({success: false, error: err}));
 });
+app.get('/api/image/:id/blur', function(req, res) {
+    db.oneOrNone('SELECT thumbnail, mimetype FROM public.images WHERE id = $1', [req.params.id])
+    .then(data => {
+        const img = new Buffer(data.thumbnail, 'binary');
+        createBlurThumbnail(img, data.mimetype).then(blur => {
+            res.writeHead(200, {
+                'Content-Type': data.mimetype,
+                'Content-Length': blur.length
+            });
+            res.end(blur);
+        });
+    }).catch(err => res.status(404).json({success: false, error: err}));
+});
 app.get('/api/categories', function(req, res) {
     db.any('SELECT * FROM categories')
     .then(data => res.send(data))
@@ -152,7 +145,7 @@ app.get('/api/categories', function(req, res) {
 app.get('/api/categories/images/:name', function(req, res) {
     db.one('SELECT id FROM categories WHERE name = $1', [req.params.name])
     .then(name => {
-        db.any('SELECT images.id, images.name, images.created, users.username FROM image_detail INNER JOIN images ON image_detail.image_id=images.id ' +
+        db.any('SELECT images.id, images.name, images.created, users.username FROM images ' +
         'INNER JOIN users ON images.userid=users.id WHERE category_id = $1', [name.id])
         .then(data => res.send(data)
         ).catch(err => res.status(500).send({success: false, error: err}));
@@ -215,19 +208,17 @@ app.post('/api/logout', restricted(), function(req, res) {
     res.redirect('/');
 });
 
-app.get('/profile', restricted(), function(req, res) {
-    res.send('yay, logged in!');
-});
 app.post('/api/upload', restricted(), upload.single('image'), function(req, res) {
     createThumbnail(req.file.buffer, req.file.mimetype, 200, 140).then(thumbnail => {
-        db.one('INSERT INTO public.images (name, image, thumbnail, mimetype, created, userid) VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP, $5) RETURNING id',
-        [req.body.name, req.file.buffer, thumbnail, req.file.mimetype, req.user.id])
+        db.one('INSERT INTO public.images (name, image, thumbnail, mimetype, created, userid, category_id, description) ' +
+        'VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP, $5, $6, $7) RETURNING id',
+        [req.body.name, req.file.buffer, thumbnail, req.file.mimetype, req.user.id, req.body.category, req.body.description])
         .then(data => res.send({success: true, id: data.id}))
         .catch(err => res.status(500).send({success: false, error: err}));
     });
 });
 app.post('/api/gear', restricted(), function(req, res) {
-    db.none('INSERT INTO gear (userid, gear_type, name) VALUES ($1, $2, $3)', [req.user.id, req.body.gearId, req.body.name])
+    db.none('INSERT INTO gear (userid, gear_type, name) VALUES ($1, $2, $3)', [req.user.id, req.body.gearType, req.body.gearName])
     .then(() => res.send({success: true}))
     .catch(err => res.status(500).send({success: false, error: err}));
 });
@@ -238,6 +229,49 @@ app.get('/api/gear', restricted(), function(req, res) {
     })
     .catch(err => res.status(500).send({success: false, error: err}));
 });
+
+app.delete('/api/gear/:id', restricted(), function(req, res) {
+    db.none('DELETE FROM gear WHERE id = $1 AND userid = $2', [req.params.id, req.user.id])
+    .then(() => res.send({success: true}))
+    .catch(err => res.status(500).send({sucess: false, error: err}));
+});
+
+app.post('/api/upload/details', restricted(), function(req, res) {
+    db.one('SELECT count(image_id) FROM image_gear WHERE image_id = $1', [req.body.id])
+    .then(result => {
+        console.log(result.count);
+        if(result.count === '0') {
+            //no entrys
+            db.one('SELECT userid FROM images WHERE id = $1', [req.body.id])
+            .then(data => {
+                if(data.userid === String(req.user.id)) {
+                    //right user
+                    const cs = new pgp.helpers.ColumnSet(['image_id', 'gear_id'], {table: 'image_gear'});
+                    const query = pgp.helpers.insert(req.body.gearArray, cs);
+                    db.none(query)
+                    .then(() => res.send({success: true, id: req.body.id}))
+                    .catch(err => res.status({success: false, error: err}));
+                } else {
+                    res.status(400).send({success: false, error: 'User don\' own image'});
+                }
+            }).catch(err => res.status(500).send({success: false, error: err}));
+        } else {
+            res.status(400).send({success: false, error: 'Gear data already exists'});
+        }
+    }).catch(err => res.status(500).send({success: false, error: err}));
+});
+
+app.get('/api/user/image/:id', restricted(), function(req, res) {
+    db.one('SELECT count(id) FROM images WHERE userid = $1 AND id = $2', [req.user.id, req.params.id])
+    .then(result => {
+        if(result.count === '1') {
+            res.send({success: true});
+        } else {
+            res.status(400).send({success: false, error: 'User don\'t own image'});
+        }
+    }).catch(err => res.status(500).send({success: false, error: err}));
+});
+
 // admin endpoints below
 const adminOnly = (req, res, next) => {
     if(req.user && req.user.role === 'admin') {
@@ -279,12 +313,6 @@ app.get('/api/users', restricted(), adminOnly, function(req, res) {
     .catch(err => res.status(500).send({sucess: false, error: err}));
 });
 
-app.get('/api/users', restricted(), adminOnly, function (req, res) {
-    db.any('SELECT id, username, role FROM users ORDER BY id DESC')
-    .then(data => res.send(data))
-    .catch(err => res.status(500).send({success: false, error: err}));
-});
-
 app.post('/api/users/promote/', restricted(), adminOnly, function(req, res) {
     if(req.user.id === req.body.id) {
         res.status(400).send({sucess: false, error: 'unable to demote self'});
@@ -306,7 +334,6 @@ app.delete('/api/users/:id', restricted(), adminOnly, function(req, res) {
 });
 
 app.get('/api/*', function(req, res) {
-    console.log('API 404');
     res.status(404).send({message: 'API endpoint not found'});
 });
 

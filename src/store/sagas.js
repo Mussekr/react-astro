@@ -23,7 +23,7 @@ function *addUser(action) {
     try {
         const body = __.pick(action, ['username', 'password']);
         const post = yield call(() => api.post('/api/register', body));
-        yield put({type: Actions.NAVIGATE_TO_INDEX, message: post});
+        yield put({type: Actions.REGISTER_FAILED, message: post});
     } catch(err) {
         yield put({type: Actions.REGISTER_FAILED, message: err});
     }
@@ -84,7 +84,7 @@ function *fetchUserListSaga() {
 
 function *deleteCategory(action) {
     try {
-        yield call(() => api.delete(`/api/category/${action.id}`));
+        yield call(() => api.del(`/api/category/${action.id}`));
         yield put({type: Actions.REQUEST_CATEGORIES_LIST});
     } catch(e) {
         yield put({type: Actions.DELETE_CATEGORY_FAILURE});
@@ -118,6 +118,85 @@ function *addCategorySaga() {
     yield* takeEvery(Actions.ADD_CATEGORY, addCategory);
 }
 
+function *fetchGear() {
+    try {
+        const gear = yield call(() => api.json('/api/gear'));
+        yield put({type: Actions.GEAR_LIST, gear: gear});
+    } catch(e) {
+        yield put({type: Actions.GEAR_LIST_FAILURE, error: e});
+    }
+}
+
+function *fetcgGearSaga() {
+    yield* takeEvery(Actions.REQUEST_GEAR_LIST, fetchGear);
+}
+
+function *deleteGear(action) {
+    try {
+        yield call(() => api.del(`/api/gear/${action.id}`));
+        yield put({type: Actions.REQUEST_GEAR_LIST});
+    } catch(e) {
+        yield put({type: Actions.DELETE_GEAR_FAILED, error: e});
+    }
+}
+
+function *deleteGearSaga() {
+    yield* takeEvery(Actions.DELETE_GEAR, deleteGear);
+}
+
+function *addGear(action) {
+    try {
+        const body = __.pick(action, ['gearType', 'gearName']);
+        yield call(() => api.post('/api/gear', body));
+        yield put({type: Actions.REQUEST_GEAR_LIST});
+    } catch(e) {
+        yield put({type: Actions.ADD_GEAR_FAILED, error: e});
+    }
+}
+
+function *addGearSaga() {
+    yield* takeEvery(Actions.ADD_GEAR, addGear);
+}
+
+function *addGearToImage(action) {
+    try {
+        const body = __.pick(action, ['gearArray', 'id']);
+        yield call(() => api.post('/api/upload/details', body));
+        yield put({type: Actions.IMAGE_GEAR});
+    } catch(e) {
+        yield put({type: Actions.IMAGE_GEAR_FAILED, error: e});
+    }
+}
+function *addGearToImageSaga() {
+    yield* takeEvery(Actions.ADD_IMAGE_GEAR, addGearToImage);
+}
+
+function *fetchImageGearList(action) {
+    try {
+        const gear = yield call(() => api.json(`/api/image/${action.id}/gear`));
+        yield put({type: Actions.GEAR_LIST, gear: gear});
+    } catch(e) {
+        yield put({type: Actions.GEAR_LIST_FAILURE, error: e});
+    }
+}
+
+function *fetchImageGearListSaga() {
+    yield* takeEvery(Actions.REQUEST_IMAGE_GEAR, fetchImageGearList);
+}
+
+function *fetchImageDetails(action) {
+    try {
+        const details = yield call(() => api.json(`/api/image/${action.id}/details`));
+        yield put({type: Actions.IMAGE_DETAILS_LIST, details: details});
+    } catch(e) {
+        yield put({type: Actions.IMAGE_DETAILS_FAILED, error: e});
+    }
+}
+
+function *fetchImageDetailsSaga() {
+    yield* takeEvery(Actions.REQUEST_IMAGE_DETAILS, fetchImageDetails);
+}
+
 export default function *root() {
     yield [
         fork(fetchUserInfoSaga),
@@ -128,6 +207,12 @@ export default function *root() {
         fork(updateGroupSaga),
         fork(deleteCategorySaga),
         fork(updateCategoryImageSaga),
-        fork(addCategorySaga)
+        fork(addCategorySaga),
+        fork(fetcgGearSaga),
+        fork(deleteGearSaga),
+        fork(addGearSaga),
+        fork(addGearToImageSaga),
+        fork(fetchImageGearListSaga),
+        fork(fetchImageDetailsSaga)
     ];
 }

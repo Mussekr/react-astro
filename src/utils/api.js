@@ -25,10 +25,12 @@ const post = (url, body, opts = {}, ...rest) =>
         }, opts.headers)
     }), ...rest);
 
-const postImage = (blob, name, opts = {}) => {
+const postImage = (blob, name, category, description, opts = {}) => {
     const data = new FormData();
     data.append('image', blob);
     data.append('name', name);
+    data.append('category', category);
+    data.append('description', description);
     return request('/api/upload', {
         method: 'POST',
         headers: Object.assign({}, opts.headers),

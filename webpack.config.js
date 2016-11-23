@@ -29,23 +29,23 @@ module.exports = {
         },
         {
             test: /\.woff(\?v=\d+\.\d+\.\d+)?$/,
-            loader: 'url?limit=10000&mimetype=application/font-woff&name=./webpack-assets/[name]/[hash].[ext]'
+            loader: 'url?limit=10000&mimetype=application/font-woff&name=./assets/[name]/[hash].[ext]'
         },
         {
             test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/,
-            loader: 'url?limit=10000&mimetype=application/font-woff&name=./webpack-assets/[name]/[hash].[ext]'
+            loader: 'url?limit=10000&mimetype=application/font-woff&name=./assets/[name]/[hash].[ext]'
         },
         {
             test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
-            loader: 'url?limit=10000&mimetype=application/octet-stream&name=./webpack-assets/[name]/[hash].[ext]'
+            loader: 'url?limit=10000&mimetype=application/octet-stream&name=./assets/[name]/[hash].[ext]'
         },
         {
             test: /\.eot(\?v=\d+\.\d+\.\d+)?$/,
-            loader: 'file?&name=./webpack-assets/[name]/[hash].[ext]'
+            loader: 'file?&name=./assets/[name]/[hash].[ext]'
         },
         {
             test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
-            loader: 'url?limit=10000&mimetype=image/svg+xml&name=./webpack-assets/[name]/[hash].[ext]'
+            loader: 'url?limit=10000&mimetype=image/svg+xml&name=./assets/[name]/[hash].[ext]'
         },
         {
             test: /\.scss$/,
@@ -54,6 +54,10 @@ module.exports = {
         {
             test: /\.css$/,
             loader: ExtractTextPlugin.extract('css')
+        },
+        {
+            test: /\.(png|jpg)$/,
+            loader: 'url?limit=100000&name=./imgs/[hash].[ext]'
         }
         ]
     },
