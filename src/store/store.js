@@ -71,7 +71,7 @@ const sagaMiddleware = createSagaMiddleware();
 /*eslint-disable no-underscore-dangle*/
 const store = createStore(
     reducers,
-    compose(applyMiddleware(middleware), applyMiddleware(sagaMiddleware), window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__())
+    compose(applyMiddleware(middleware), applyMiddleware(sagaMiddleware))
 );
 
 /*eslint-enable no-underscore-dangle*/
