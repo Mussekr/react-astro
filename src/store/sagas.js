@@ -3,8 +3,9 @@ import { call, put, fork } from 'redux-saga/effects';
 import api from '../utils/api';
 import Actions from '../constants/actions';
 import __ from 'lodash';
+import store from './store';
 
-/*import { push } from 'react-router-redux';*/
+import { replace } from 'react-router-redux';
 
 function *fetchUserInfo() {
     try {
@@ -22,8 +23,8 @@ function *fetchUserInfoSaga() {
 function *addUser(action) {
     try {
         const body = __.pick(action, ['username', 'password']);
-        const post = yield call(() => api.post('/api/register', body));
-        yield put({type: Actions.REGISTER_FAILED, message: post});
+        yield call(() => api.post('/api/register', body));
+        yield put({type: Actions.NAVIGATE_LOCATION, location: '/'});
     } catch(err) {
         yield put({type: Actions.REGISTER_FAILED, message: err});
     }
@@ -162,7 +163,7 @@ function *addGearToImage(action) {
     try {
         const body = __.pick(action, ['gearArray', 'id']);
         yield call(() => api.post('/api/upload/details', body));
-        yield put({type: Actions.IMAGE_GEAR});
+        yield put({type: Actions.NAVIGATE_LOCATION, location: '/upload/filters/' + body.id});
     } catch(e) {
         yield put({type: Actions.IMAGE_GEAR_FAILED, error: e});
     }
@@ -197,6 +198,37 @@ function *fetchImageDetailsSaga() {
     yield* takeEvery(Actions.REQUEST_IMAGE_DETAILS, fetchImageDetails);
 }
 
+function *addImageFilters(action) {
+    try {
+        const body = __.pick(action, ['filterArray', 'id']);
+        yield call(() => api.post('/api/upload/filters', body));
+        yield put({type: Actions.NAVIGATE_LOCATION, location: '/image/' + body.id});
+    } catch(e) {
+        yield put({type: Actions.ADD_GEAR_FAILED});
+    }
+}
+
+function *addImageFiltersSaga() {
+    yield* takeEvery(Actions.ADD_IMAGE_FILTERS, addImageFilters);
+}
+
+function *fetchImageFilters(action) {
+    const data = yield call(() => api.json(`/api/image/${action.id}/filters`));
+    yield put({type: Actions.IMAGE_FILTERS_LOADED, filters: data});
+}
+
+function *fetchImageFiltersSaga() {
+    yield* takeEvery(Actions.REQUEST_IMAGE_FILTERS, fetchImageFilters);
+}
+
+function *navigateToLocation(action) {
+    yield call(() => store.dispatch(replace(action.location)));
+}
+
+function *navigateToLocationSaga() {
+    yield* takeEvery(Actions.NAVIGATE_LOCATION, navigateToLocation);
+}
+
 export default function *root() {
     yield [
         fork(fetchUserInfoSaga),
@@ -213,6 +245,9 @@ export default function *root() {
         fork(addGearSaga),
         fork(addGearToImageSaga),
         fork(fetchImageGearListSaga),
-        fork(fetchImageDetailsSaga)
+        fork(fetchImageDetailsSaga),
+        fork(addImageFiltersSaga),
+        fork(fetchImageFiltersSaga),
+        fork(navigateToLocationSaga)
     ];
 }

@@ -106,6 +106,13 @@ app.get('/api/image/:id/gear', function(req, res) {
     .catch(err => res.status(500).send({sucess: false, error: err}));
 });
 
+app.get('/api/image/:id/filters', function(req, res) {
+    db.any('SELECT image_filter.exposure, image_filter.subframes, gear.name FROM image_filter ' +
+    'INNER JOIN gear ON image_filter.filter=gear.id WHERE image_id = $1', [req.params.id])
+    .then(data => res.send(data))
+    .catch(err => res.status(500).send({success: false, error: err}));
+});
+
 app.get('/api/image/:id/details', function(req, res) {
     db.any('SELECT images.created, images.description, images.name, users.username FROM images ' +
     'INNER JOIN users ON images.userid=users.id WHERE images.id = $1', [req.params.id])
@@ -234,6 +241,28 @@ app.delete('/api/gear/:id', restricted(), function(req, res) {
     db.none('DELETE FROM gear WHERE id = $1 AND userid = $2', [req.params.id, req.user.id])
     .then(() => res.send({success: true}))
     .catch(err => res.status(500).send({sucess: false, error: err}));
+});
+
+app.post('/api/upload/filters', restricted(), function(req, res) {
+    db.one('SELECT count(image_id) FROM image_filter WHERE image_id = $1', [req.body.id])
+    .then(result => {
+        if(result.count === '0') {
+            db.one('SELECT userid FROM images WHERE id = $1', [req.body.id])
+            .then(data => {
+                if(data.userid === String(req.user.id)) {
+                    const filterSet = new pgp.helpers.ColumnSet(['image_id', 'filter', 'subframes', 'exposure'], {table: 'image_filter'});
+                    const filterQuery = pgp.helpers.insert(req.body.filterArray, filterSet);
+                    db.none(filterQuery)
+                    .then(() => res.send({success: true, id: req.body.id}))
+                    .catch(err => res.status({success: false, error: err}));
+                } else {
+                    res.status(400).send({success: false, error: 'User don\' own image'});
+                }
+            }).catch(err => res.status({success: false, error: err}));
+        } else {
+            res.status(400).send({success: false, error: 'Filter data already exists'});
+        }
+    }).catch(err => res.status({success: false, error: err}));
 });
 
 app.post('/api/upload/details', restricted(), function(req, res) {

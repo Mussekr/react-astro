@@ -12,7 +12,7 @@ export default keyMirror({
     REQUEST_CATEGORIES_IMAGES_LIST: null,
     CATEGORIES_IMAGES_LIST_LOADED: null,
     ADD_USER: null,
-    NAVIGATE_TO_INDEX: null,
+    NAVIGATE_LOCATION: null,
     REGISTER_FAILED: null,
     LOGOUT: null,
     REQUEST_GEAR_LIST: null,
@@ -41,5 +41,9 @@ export default keyMirror({
     REQUEST_IMAGE_GEAR: null,
     REQUEST_IMAGE_DETAILS: null,
     IMAGE_DETAILS_LIST: null,
-    IMAGE_DETAILS_FAILED: null
+    IMAGE_DETAILS_FAILED: null,
+    ADD_IMAGE_FILTERS: null,
+    IMAGE_FILTERS: null,
+    REQUEST_IMAGE_FILTERS: null,
+    IMAGE_FILTERS_LOADED: null
 });

@@ -8,7 +8,8 @@ const initialState = Immutable.Map({
     guideCamera: Immutable.List(),
     filter: Immutable.List(),
     misc: Immutable.List(),
-    gearError: Immutable.List()
+    gearError: Immutable.List(),
+    filters: Immutable.List()
 });
 
 /* eslint-disable arrow-body-style */
@@ -24,6 +25,10 @@ export function reducer(state = initialState, action) {
         return state.set('gearError', Immutable.List(action.error));
     case Actions.IMAGE_GEAR_FAILED:
         return state.set('gearError', Immutable.List(action.error));
+    case Actions.IMAGE_FILTERS:
+        return state;
+    case Actions.IMAGE_FILTERS_LOADED:
+        return state.set('filters', Immutable.List(action.filters));
     default:
         return state;
     }

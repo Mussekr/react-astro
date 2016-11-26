@@ -3,8 +3,6 @@ import { connect } from 'react-redux';
 import { Form, FormGroup, Col, ControlLabel, FormControl, Button, HelpBlock } from 'react-bootstrap';
 import { createAction } from '../utils/ActionCreator';
 import Actions from '../constants/actions';
-import { push } from 'react-router-redux';
-import store from '../store/store';
 
 const mapStateToProps = state => state.users.toJS();
 const mapDispatchToProps = dispatch => ({
@@ -51,14 +49,6 @@ const Register = React.createClass({
             this.props.onAdd(this.state.username, this.state.password);
         }
     },
-    redirectIfSuccessful: function() {
-        if(this.props.registerError.success === true) {
-            store.dispatch(push('/'));
-            return 'Successful';
-        } else {
-            return null;
-        }
-    },
     render: function() {
         let registerError = null;
         if(!this.props.registerError.success) {
@@ -100,7 +90,6 @@ const Register = React.createClass({
                         </Button>
                     </Col>
                 </FormGroup>
-                {this.redirectIfSuccessful()}
                 {registerError}
             </Form>
         );

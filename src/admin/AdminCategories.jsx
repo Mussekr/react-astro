@@ -16,7 +16,7 @@ const renderCategory = (id, name, changeImage, onDelete) => (
     </tr>
 );
 
-const renderAddForm = (onChange, onAdd, validator) => (
+const renderAddForm = (onChange, onAdd, validator, nameValue, imageValue) => (
     <tr>
         <td></td>
         <td>
@@ -28,6 +28,7 @@ const renderAddForm = (onChange, onAdd, validator) => (
                     placeholder="Name"
                     onKeyPress={ev => ev.key === 'Enter' ? onAdd() : null}
                     onChange={ev => onChange('name', ev.target.value)}
+                    value={nameValue}
                 />
             </FormGroup>
         </td>
@@ -40,6 +41,7 @@ const renderAddForm = (onChange, onAdd, validator) => (
                     placeholder="ID of image"
                     onKeyPress={ev => ev.key === 'Enter' ? onAdd() : null}
                     onChange={ev => onChange('image', ev.target.value)}
+                    value={imageValue}
                 />
             </FormGroup>
         </td>
@@ -108,6 +110,10 @@ const AdminCategories = React.createClass({
     },
     onSubmit: function() {
         this.props.onCategoryAdd(this.state.name, this.state.image);
+        this.setState({
+            name: '',
+            image: ''
+        });
     },
     render: function() {
         if(this.isAdmin()) {
@@ -122,7 +128,8 @@ const AdminCategories = React.createClass({
                     </thead>
                     <tbody>
                         {this.props.categories.map(category =>
-                            renderCategory(category.id, category.name, () => this.changeImage(category.name), () => this.onDelete(category.id))
+                            renderCategory(category.id, category.name, () => this.changeImage(category.name), () => this.onDelete(category.id)),
+                            this.state.name, this.state.image
                         )}
                         {renderAddForm(this.handleOnChange, this.onSubmit, this.validate)}
                     </tbody>

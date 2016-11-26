@@ -50,6 +50,7 @@ const Gear = React.createClass({
     },
     onAdd: function(field) {
         this.props.addGear(field, this.state[field]);
+        this.setState({[field]: ''});
     },
     render: function() {
         if(this.isLoggedIn()) {
@@ -58,23 +59,23 @@ const Gear = React.createClass({
                     <Col xs={4} md={4}>
                         <h1>Add Gear</h1>
                         <GearList data={this.props.telescope} name="Telescopes"onChange={ev => this.handleChange('telescopeSelect', ev.target.value)}
-                        onChangeText={ev => this.handleChange('telescope', ev.target.value)}
+                        onChangeText={ev => this.handleChange('telescope', ev.target.value)} inputValue={this.state.telescope}
                         onDelete={() => this.onDelete('telescopeSelect')} onAdd={() => this.onAdd('telescope')} />
                         <GearList data={this.props.mount} name="Mounts" onChange={ev => this.handleChange('mountSelect', ev.target.value)}
-                        onChangeText={ev => this.handleChange('mount', ev.target.value)}
+                        onChangeText={ev => this.handleChange('mount', ev.target.value)} inputValue={this.state.mount}
                         onDelete={() => this.onDelete('mountSelect')} onAdd={() => this.onAdd('mount')} />
                         <GearList data={this.props.imagingCamera} name="Imaging cameras"
                         onChange={ev => this.handleChange('imagingCameraSelect', ev.target.value)}
-                        onChangeText={ev => this.handleChange('imagingCamera', ev.target.value)}
+                        onChangeText={ev => this.handleChange('imagingCamera', ev.target.value)} inputValue={this.state.imagingCamera}
                         onDelete={() => this.onDelete('imagingCameraSelect')} onAdd={() => this.onAdd('imagingCamera')} />
                         <GearList data={this.props.guideCamera} name="Guide cameras" onChange={ev => this.handleChange('guideCameraSelect', ev.target.value)}
-                        onChangeText={ev => this.handleChange('guideCamera', ev.target.value)}
+                        onChangeText={ev => this.handleChange('guideCamera', ev.target.value)} inputValue={this.state.guideCamera}
                         onDelete={() => this.onDelete('guideCameraSelect')} onAdd={() => this.onAdd('guideCamera')} />
                         <GearList data={this.props.filter} name="Filters" onChange={ev => this.handleChange('filterSelect', ev.target.value)}
-                        onChangeText={ev => this.handleChange('filter', ev.target.value)}
+                        onChangeText={ev => this.handleChange('filter', ev.target.value)} inputValue={this.state.filter}
                         onDelete={() => this.onDelete('filterSelect')} onAdd={() => this.onAdd('filter')} />
                         <GearList data={this.props.misc} name="Misc" onChange={ev => this.handleChange('miscSelect', ev.target.value)}
-                        onChangeText={ev => this.handleChange('misc', ev.target.value)}
+                        onChangeText={ev => this.handleChange('misc', ev.target.value)} inputValue={this.state.misc}
                         onDelete={() => this.onDelete('miscSelect')} onAdd={() => this.onAdd('misc')} />
                     </Col>
                 </div>
@@ -91,6 +92,7 @@ const GearList = React.createClass({
     propTypes: {
         data: React.PropTypes.arrayOf(React.PropTypes.object.isRequired).isRequired,
         name: React.PropTypes.string.isRequired,
+        inputValue: React.PropTypes.string.isRequired,
         onChange: React.PropTypes.func.isRequired,
         onChangeText: React.PropTypes.func.isRequired,
         onDelete: React.PropTypes.func.isRequired,
@@ -116,6 +118,7 @@ const GearList = React.createClass({
                     type="text"
                     placeholder="Gear Name"
                     onChange={this.props.onChangeText}
+                    value={this.props.inputValue}
                     required
                 />
                 <Button bsStyle="success" onClick={this.props.onAdd}>Add</Button>
