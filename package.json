@@ -8,7 +8,7 @@
     "url": "react-astro"
   },
   "engines": {
-    "node": "^4.4.0",
+    "node": "^6.11.1",
     "npm": "^2.14.7"
   },
   "scripts": {
